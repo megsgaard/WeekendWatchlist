@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">WeekendWatchlist</string>
+    <string name ="IntentAdapterDetails">IntentAdapterDetails</string>
 </resources>
