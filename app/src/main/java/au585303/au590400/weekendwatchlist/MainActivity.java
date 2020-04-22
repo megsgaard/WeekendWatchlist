@@ -1,5 +1,6 @@
 package au585303.au590400.weekendwatchlist;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -8,33 +9,45 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
-    private static final int RC_SIGN_IN = 1111111;
-    private static final String LOG = "MainActivity";
-    private boolean userLoggedIn =false;
-
+    private static final int RC_SIGN_IN = 11;
+    private static final String TAG = "MainActivity";
+    private boolean userLoggedIn = false;
+    private TextView txt;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d(LOG,"onCreate called");
+        Log.d(TAG, "onCreate called");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        txt = findViewById(R.id.textView);
         Button btn = findViewById(R.id.button);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //If user is already logged in: //TODO: Ved ikke om dette er nødvendigt?
-                Intent intent = new Intent(MainActivity.this,ListActivity.class);
-                startActivity(intent);
+                //Intent intent = new Intent(MainActivity.this,ListActivity.class);
+                //startActivity(intent);
 
                 //If user is not logged in:
                 // Choose authentication providers
@@ -49,6 +62,27 @@ public class MainActivity extends AppCompatActivity {
                         RC_SIGN_IN);
             }
         });
+        Button btnShare = findViewById(R.id.btnShare);
+        btnShare.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+                Map<String, Object> dataToSave = new HashMap<>();
+                dataToSave.put("text", "This has been updated by: " + userEmail);
+                final DocumentReference documentReference = db.document("users/test2@mail.com");
+                documentReference.set(dataToSave).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "onSuccess: Document has been saved!");
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "onFailure: Document was not saved!", e);
+                    }
+                });
+            }
+        });
     }
 
     @Override
@@ -56,17 +90,47 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RC_SIGN_IN) {
             IdpResponse response = IdpResponse.fromResultIntent(data);
-            Log.d(LOG,"RequestCode correct");
+            Log.d(TAG, "RequestCode correct");
 
 
             if (resultCode == RESULT_OK) {
-                Log.d(LOG,"Result code OK");
+                Log.d(TAG, "Result code OK");
                 // Successfully signed in
-                //FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                userLoggedIn=true;
+
+                // Dummy code to test read and write
+
+                // Write data
+                String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+                Map<String, Object> dataToSave = new HashMap<>();
+                dataToSave.put("text", "This was written by: " + userEmail);
+                final DocumentReference documentReference = db.document("users/" + userEmail);
+                documentReference.set(dataToSave).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "onSuccess: Document has been saved!");
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "onFailure: Document was not saved!", e);
+                    }
+                });
+
+                // Read data
+                documentReference.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
+                        if (documentSnapshot.exists()) {
+                            String testString = documentSnapshot.getString("text");
+                            txt.setText(testString);
+                        }
+                    }
+                });
+
+                userLoggedIn = true;
                 //If user is already logged in:
-                Intent intent = new Intent(MainActivity.this,ListActivity.class);
-                startActivity(intent);
+//                Intent intent = new Intent(MainActivity.this,ListActivity.class);
+//                startActivity(intent);
 
                 // ...
             } else {
@@ -77,11 +141,5 @@ public class MainActivity extends AppCompatActivity {
                 userLoggedIn = false;
             }
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.d(LOG,"onResume called");
     }
 }
