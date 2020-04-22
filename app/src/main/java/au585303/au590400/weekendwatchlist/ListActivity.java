@@ -3,7 +3,11 @@ package au585303.au590400.weekendwatchlist;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.graphics.Movie;
+import android.icu.text.CaseMap;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -30,10 +34,19 @@ public class ListActivity extends AppCompatActivity {
     private FirebaseFirestore fireStore = FirebaseFirestore.getInstance();
     private ListenerRegistration itemsListener;
     private String LOG = "ListActivity";
+    RecyclerView recyclerView;
+    RecyclerView.Adapter adapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(LOG,"onCreate called");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
+
+        //Set variable
+        recyclerView = findViewById(R.id.recyclerView);
+
+
 
         //Kode direkte kopieret fra hans demo
         Map<String,Object> item = new HashMap<>();
@@ -50,6 +63,27 @@ public class ListActivity extends AppCompatActivity {
                 Log.d(LOG, e.getMessage());
             }
         });
+
+        //List af film til test af adapter //TODO: Slet når færdig
+        List<MovieGsonObject> movies = new ArrayList<>();
+        MovieGsonObject movie1 = new MovieGsonObject();
+        movie1.setTitle("Joker");
+        movie1.setYear("2019");
+        MovieGsonObject movie2 = new MovieGsonObject();
+        movie1.setTitle("FRIDA");
+        movie1.setYear("22019");
+        MovieGsonObject movie3 = new MovieGsonObject();
+        movie1.setTitle("MAthias");
+        movie1.setYear("201d9");
+        movies.add(movie1);
+        movies.add(movie2);
+        movies.add(movie3);
+
+
+        //Set up adapter and recyclerview
+        adapter = new ListAdapter(movies);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(adapter);
     }
 
     @Override
@@ -67,6 +101,7 @@ public class ListActivity extends AppCompatActivity {
                                 items.add(snapshot.getData().get("text").toString());
                             }
                             //adapter.setItems(items);
+
                         }
                     }
                 }
