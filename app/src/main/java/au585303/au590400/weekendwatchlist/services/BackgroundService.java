@@ -14,14 +14,16 @@ public class BackgroundService extends Service {
     //Declare variables
     private final IBinder myBinder = new LocalBinder();
     private final static String LOG = "BackgroundService";
+    private FirestoreService firestoreService;
 
     //Constructor
     public BackgroundService() {
+        firestoreService = new FirestoreService();
     }
 
     //Create a binder object
     public class LocalBinder extends Binder {
-        BackgroundService getService(){
+        public BackgroundService getService(){
             return BackgroundService.this;
         }
     }
@@ -42,7 +44,8 @@ public class BackgroundService extends Service {
 
     public void addMovie() //TODO: Implement
     {
-
+        Log.d(LOG, "addMovie: ");
+        firestoreService.addMovie();
     }
 
     public MovieGsonObject getMovie() //TODO: Impelemnt + udskift MovieGsonObject
