@@ -201,8 +201,8 @@ public class MainActivity extends AppCompatActivity {
 
                 userLoggedIn = true;
                 //If user is already logged in:
-//                Intent intent = new Intent(MainActivity.this,ListActivity.class);
-//                startActivity(intent);
+                Intent intent = new Intent(MainActivity.this,ListActivity.class);
+                startActivity(intent);
 
                 // ...
             } else {

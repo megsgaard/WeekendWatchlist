@@ -7,12 +7,18 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.text.method.MovementMethod;
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -29,15 +35,39 @@ import java.util.Map;
 
 import au585303.au590400.weekendwatchlist.adapters.ListAdapter;
 import au585303.au590400.weekendwatchlist.R;
+import au585303.au590400.weekendwatchlist.models.Movie;
 import au585303.au590400.weekendwatchlist.models.MovieGsonObject;
+import au585303.au590400.weekendwatchlist.services.APIHandler;
+
+import static android.widget.Toast.LENGTH_LONG;
 
 public class ListActivity extends AppCompatActivity implements ListAdapter.OnItemClickListener {
 
     private FirebaseFirestore fireStore = FirebaseFirestore.getInstance();
     private ListenerRegistration itemsListener;
     private String LOG = "ListActivity";
+
+    //TODO: FHJ: Læg disse i den klasse, hvor det skal foregå
+    private APIHandler.IApiResponseListener listener;
+    private APIHandler apiHandler;
+
+
+    //widgets
     RecyclerView recyclerView;
     RecyclerView.Adapter adapter;
+    FloatingActionButton buttonAdd;
+
+    //Constructor //TODO: FHJ: Fjern denne? Når indholdet er flyttet derhen hvor det skal være
+    public ListActivity(){
+        //Inspiration for creating a response listener is found here: https://guides.codepath.com/android/Creating-Custom-Listeners
+        listener = new APIHandler.IApiResponseListener() {
+            @Override
+            public void onMovieReady(Movie movie) {
+                Log.d(LOG,"onMovieReady Enter");
+            }
+        };
+        apiHandler= new APIHandler(this,listener);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,9 +75,9 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
 
-        //Set variable
+        //Set widgets
         recyclerView = findViewById(R.id.recyclerView);
-
+        buttonAdd = findViewById(R.id.fabAdd);
 
 
         //Kode direkte kopieret fra hans demo
@@ -81,11 +111,18 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
         movies.add(movie2);
         movies.add(movie3);
 
-
         //Set up adapter and recyclerview
         adapter = new ListAdapter(movies, this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
+
+        //Test af button_add //TODO: FHJ: Lav denne som den rigtigt skal være
+        buttonAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                apiHandler.addRequest("Joker");
+            }
+        });
     }
 
     @Override
