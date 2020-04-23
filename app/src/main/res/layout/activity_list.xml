@@ -27,6 +27,7 @@
         android:id="@+id/fabAdd"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="16dp"
         android:clickable="true"
         android:focusable="true"
         android:src="@android:drawable/ic_menu_add"

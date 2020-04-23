@@ -16,18 +16,17 @@ public class Movie {
     private String personalNotes;
 
     //Constructor
-    public Movie(String title, String year, String genre, String runtime, String director, String writer, String actors, String plot, String awards, String poster, String imdbRating)
-    {
-        this.title=title;
-        this.year=year;
+    public Movie(String title, String year, String genre, String runtime, String director, String writer, String actors, String plot, String awards, String poster, String imdbRating) {
+        this.title = title;
+        this.year = year;
         this.genre = genre;
         this.runtime = runtime;
         this.director = director;
-        this.writer  = writer;
+        this.writer = writer;
         this.actors = actors;
         this.plot = plot;
         this.awards = awards;
-        this.poster= poster;
+        this.poster = poster;
         this.imdbRating = imdbRating;
     }
 

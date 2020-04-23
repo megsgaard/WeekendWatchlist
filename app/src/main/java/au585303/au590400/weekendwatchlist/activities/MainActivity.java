@@ -61,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
         shareTxt = findViewById(R.id.txtShareEmail);
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             txt.setText("User logged in: " + FirebaseAuth.getInstance().getCurrentUser().getEmail());
+            Intent intent = new Intent(MainActivity.this,ListActivity.class);
+            startActivity(intent);
         } else {
             txt.setText("No user logged in");
         }

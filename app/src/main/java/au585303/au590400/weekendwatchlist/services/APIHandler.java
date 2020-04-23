@@ -31,26 +31,24 @@ public class APIHandler {
     //Variables
     private static final String TAG = "APIHandler";
     private IApiResponseListener listener;
-    private static String API_URL ="http://www.omdbapi.com/?apikey=edeb0a57&"; //"http://www.omdbapi.com/?i=tt3896198&apikey=edeb0a57";
+    private static String API_URL = "http://www.omdbapi.com/?apikey=edeb0a57&t="; //"http://www.omdbapi.com/?i=tt3896198&apikey=edeb0a57";
     private static String API_KEY = "edeb0a57";
     private RequestQueue myRequestQueue;
     private Context context;
     private Movie movieToBeAdded;
 
     //Constructor
-    public APIHandler(Context context, IApiResponseListener listener)
-    {
+    public APIHandler(Context context, IApiResponseListener listener) {
         this.listener = listener;
-        this.context =context;
+        this.context = context;
 
     }
 
     //AddRequest to queue method
-    public void addRequest(final String searchWord){
-        Log.d(TAG,"addRequest Enter");
-        if(myRequestQueue ==null)
-        {
-            Log.d(TAG,"myRequestQueue was null");
+    public void addRequest(final String searchWord) {
+        Log.d(TAG, "addRequest Enter");
+        if (myRequestQueue == null) {
+            Log.d(TAG, "myRequestQueue was null");
             myRequestQueue = Volley.newRequestQueue(context);
         }
 
@@ -61,16 +59,14 @@ public class APIHandler {
             @Override
             public void onResponse(JSONObject response) {
                 if (response != null) {
-                    Log.d(TAG,"Json response was not null");
+                    Log.d(TAG, "Json response was not null");
                     Movie movie = parseJsonWithGson(response.toString());
                     if (movie != null) {
-                        Log.d(TAG,"movie from parsing Json was not null");
-                        movieToBeAdded =movie;
+                        Log.d(TAG, "movie from parsing Json was not null");
+                        movieToBeAdded = movie;
                         listener.onMovieReady(movieToBeAdded);
-                    }
-                    else
-                    {
-                        Log.d(TAG,"movie from parsing Json was null");
+                    } else {
+                        Log.d(TAG, "movie from parsing Json was null");
                         movieToBeAdded = null;
                     }
                 }
@@ -78,7 +74,7 @@ public class APIHandler {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d(TAG,"Json response error"+error);
+                Log.d(TAG, "Json response error" + error);
 
                 //Created custom toast with inspiration from: https://stackoverflow.com/questions/31175601/how-can-i-change-default-toast-message-color-and-background-color-in-android
                 /*Toast toast = Toast.makeText(context.getApplicationContext(), searchWord + " " + context.getText(R.string.word_does_not_exist), LENGTH_LONG);
@@ -93,35 +89,33 @@ public class APIHandler {
                 toast.show();
 */
             }
-        })
-        {
-            @Override
-            public Map<String,String> getHeaders()
-            {
+        }) {
+            /*@Override
+            public Map<String, String> getHeaders() {
                 String token = API_KEY;
 
-                final Map<String,String> header;
-                header = new HashMap<String,String>();
-                header.put("Authorization","Token " + token);
+                final Map<String, String> header;
+                header = new HashMap<String, String>();
+                header.put("Authorization", "Token " + token);
                 return header;
-            }
+            }*/
         };
         myRequestQueue.add(jsonObjectRequest);
     }
 
     //Method to parse Json
-    private Movie parseJsonWithGson(String jsonString)
-    {
+    private Movie parseJsonWithGson(String jsonString) {
         Gson gson = new GsonBuilder().create();
-        MovieGsonObject movieGsonObject = gson.fromJson(jsonString,MovieGsonObject.class);
+        MovieGsonObject movieGsonObject = gson.fromJson(jsonString, MovieGsonObject.class);
 
         //Create new Movie based on MovieGsonObject
-        Movie movie = new Movie(movieGsonObject.getTitle(),movieGsonObject.getYear(),movieGsonObject.getGenre(),movieGsonObject.getRuntime(),movieGsonObject.getDirector(),movieGsonObject.getWriter(),movieGsonObject.getActors(),movieGsonObject.getPlot(),movieGsonObject.getAwards(),movieGsonObject.getPoster(),movieGsonObject.getImdbRating());
-        Log.d(TAG,movie.getPoster());
+        Movie movie = new Movie(movieGsonObject.getTitle(), movieGsonObject.getYear(), movieGsonObject.getGenre(), movieGsonObject.getRuntime(), movieGsonObject.getDirector(), movieGsonObject.getWriter(), movieGsonObject.getActors(), movieGsonObject.getPlot(), movieGsonObject.getAwards(), movieGsonObject.getPoster(), movieGsonObject.getImdbRating());
+        Log.d(TAG, movie.getPoster());
         return movie;
     }
+
     //Listener interface
-    public interface IApiResponseListener{
+    public interface IApiResponseListener {
         public void onMovieReady(Movie movie);
     }
 
