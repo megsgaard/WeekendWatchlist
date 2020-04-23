@@ -4,8 +4,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -34,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 import au585303.au590400.weekendwatchlist.R;
+import au585303.au590400.weekendwatchlist.services.BackgroundService;
 
 public class MainActivity extends AppCompatActivity {
     private static final int RC_SIGN_IN = 11;
@@ -42,12 +47,16 @@ public class MainActivity extends AppCompatActivity {
     private TextView txt;
     private EditText shareTxt;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private ServiceConnection serviceConnection;
+    private BackgroundService backgroundService;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate called");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        initService();
         txt = findViewById(R.id.textView);
         shareTxt = findViewById(R.id.txtShareEmail);
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
@@ -81,29 +90,35 @@ public class MainActivity extends AppCompatActivity {
         btnShare.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String sharedEmail = shareTxt.getText().toString();
-                shareText(sharedEmail);
-
-
-//                String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
-//                Map<String, Object> dataToSave = new HashMap<>();
-//                dataToSave.put("text", "This has been updated by: " + userEmail);
-//                final DocumentReference documentReference = db.document("users/test2@mail.com");
-//                documentReference.set(dataToSave).addOnSuccessListener(new OnSuccessListener<Void>() {
-//                    @Override
-//                    public void onSuccess(Void aVoid) {
-//                        Log.d(TAG, "onSuccess: Document has been saved!");
-//                    }
-//                }).addOnFailureListener(new OnFailureListener() {
-//                    @Override
-//                    public void onFailure(@NonNull Exception e) {
-//                        Log.w(TAG, "onFailure: Document was not saved!", e);
-//                    }
-//                });
+//                String sharedEmail = shareTxt.getText().toString();
+//                shareText(sharedEmail);
             }
         });
     }
 
+    private void initService() {
+        Log.d(TAG, "initService: setting up connection, starting and binding to service");
+        setupServiceConnection();
+        bindService(new Intent(this, BackgroundService.class), serviceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    private void setupServiceConnection() {
+        serviceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                backgroundService = ((BackgroundService.LocalBinder)service).getService();
+//                backgroundService.addMovie(); this will crash if the user isn't logged in. tested that it works. commented out to not break on first startup
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                backgroundService = null;
+            }
+        };
+    }
+
+
+    // TODO: MEG: Move or remove this block of test code
     private void shareText(String shareEmail) {
         String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
 
@@ -125,21 +140,50 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        Map<String, Object> dataToSave = new HashMap<>();
+        dataToSave.put("text", "This has been shared by: " + userEmail);
+        db.collection("users/" + shareEmail + "/movies").add(dataToSave).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+            @Override
+            public void onSuccess(DocumentReference documentReference) {
+                Log.d(TAG, "onSuccess: Document has been saved!");
+                // display toast in here that tell movie has been shared
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.w(TAG, "onFailure: Document was not saved!", e);
+            }
+        });
+    }
 
-//        Map<String, Object> dataToSave = new HashMap<>();
-//        dataToSave.put("text", "This has been shared by: " + userEmail);
-//        db.collection("users/" + shareEmail + "/movies").add(dataToSave).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-//            @Override
-//            public void onSuccess(DocumentReference documentReference) {
-//                Log.d(TAG, "onSuccess: Document has been saved!");
-//                // display toast in here that tell movie has been shared
-//            }
-//        }).addOnFailureListener(new OnFailureListener() {
-//            @Override
-//            public void onFailure(@NonNull Exception e) {
-//                Log.w(TAG, "onFailure: Document was not saved!", e);
-//            }
-//        });
+    // TODO: MEG: Move this code to FirestoreService
+    private void readData() {
+        String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+        final DocumentReference documentReference = db.document("users/" + userEmail);
+
+        // Read data
+        db.collection("users/" + userEmail + "/movies").addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                if (queryDocumentSnapshots != null && !queryDocumentSnapshots.getDocuments().isEmpty()) {
+                    List<String> items = new ArrayList<>();
+                    for (DocumentSnapshot snapshot : queryDocumentSnapshots.getDocuments()) {
+                        String testString = snapshot.getData().get("text").toString();
+                        txt.setText(testString);
+                    }
+                }
+            }
+        });
+
+        // Check if user is logged in
+        documentReference.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
+                if (documentSnapshot.exists()) {
+                    txt.setText("User logged in: " + FirebaseAuth.getInstance().getCurrentUser().getEmail());
+                }
+            }
+        });
     }
 
     @Override
@@ -149,55 +193,9 @@ public class MainActivity extends AppCompatActivity {
             IdpResponse response = IdpResponse.fromResultIntent(data);
             Log.d(TAG, "RequestCode correct");
 
-
             if (resultCode == RESULT_OK) {
                 Log.d(TAG, "Result code OK");
                 // Successfully signed in
-
-                // Dummy code to test read and write
-
-                // Write data
-                String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
-                Map<String, Object> dataToSave = new HashMap<>();
-                dataToSave.put("text", "This was written by: " + userEmail);
-                final DocumentReference documentReference = db.document("users/" + userEmail);
-                documentReference.set(dataToSave).addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "onSuccess: Document has been saved!");
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "onFailure: Document was not saved!", e);
-                    }
-                });
-
-
-                // Read data
-                db.collection("users/" + userEmail + "/movies").addSnapshotListener(new EventListener<QuerySnapshot>() {
-                    @Override
-                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                        if (queryDocumentSnapshots != null && !queryDocumentSnapshots.getDocuments().isEmpty()) {
-                            List<String> items = new ArrayList<>();
-                            for (DocumentSnapshot snapshot : queryDocumentSnapshots.getDocuments()) {
-                                String testString = snapshot.getData().get("text").toString();
-                                txt.setText(testString);
-                            }
-                        }
-                    }
-                });
-
-                // Check if user is logged in
-                documentReference.addSnapshotListener(new EventListener<DocumentSnapshot>() {
-                    @Override
-                    public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-                        if (documentSnapshot.exists()) {
-                            txt.setText("User logged in: " + FirebaseAuth.getInstance().getCurrentUser().getEmail());
-                        }
-                    }
-                });
-
 
                 userLoggedIn = true;
                 //If user is already logged in:
