@@ -1,4 +1,4 @@
-package au585303.au590400.weekendwatchlist;
+package au585303.au590400.weekendwatchlist.activities;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -32,6 +32,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import au585303.au590400.weekendwatchlist.R;
 
 public class MainActivity extends AppCompatActivity {
     private static final int RC_SIGN_IN = 11;

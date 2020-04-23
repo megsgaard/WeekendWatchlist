@@ -1,5 +1,5 @@
 
-package au585303.au590400.weekendwatchlist; ;
+package au585303.au590400.weekendwatchlist.models; ;
 
 import java.util.List;
 import com.google.gson.annotations.Expose;

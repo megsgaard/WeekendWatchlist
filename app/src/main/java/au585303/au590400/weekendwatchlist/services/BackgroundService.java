@@ -1,4 +1,4 @@
-package au585303.au590400.weekendwatchlist;
+package au585303.au590400.weekendwatchlist.services;
 
 import android.app.Service;
 import android.content.Intent;
@@ -7,6 +7,8 @@ import android.os.IBinder;
 import android.util.Log;
 
 import java.util.List;
+
+import au585303.au590400.weekendwatchlist.models.MovieGsonObject;
 
 public class BackgroundService extends Service {
     //Declare variables

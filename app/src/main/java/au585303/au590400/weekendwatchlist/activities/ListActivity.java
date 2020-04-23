@@ -1,4 +1,4 @@
-package au585303.au590400.weekendwatchlist;
+package au585303.au590400.weekendwatchlist.activities;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -6,8 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.graphics.Movie;
-import android.icu.text.CaseMap;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -20,7 +19,6 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
@@ -29,7 +27,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ListActivity extends AppCompatActivity {
+import au585303.au590400.weekendwatchlist.adapters.ListAdapter;
+import au585303.au590400.weekendwatchlist.R;
+import au585303.au590400.weekendwatchlist.models.MovieGsonObject;
+
+public class ListActivity extends AppCompatActivity implements ListAdapter.OnItemClickListener {
 
     private FirebaseFirestore fireStore = FirebaseFirestore.getInstance();
     private ListenerRegistration itemsListener;
@@ -81,7 +83,7 @@ public class ListActivity extends AppCompatActivity {
 
 
         //Set up adapter and recyclerview
-        adapter = new ListAdapter(movies);
+        adapter = new ListAdapter(movies, this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
     }
@@ -112,5 +114,11 @@ public class ListActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         itemsListener.remove();
+    }
+
+    @Override
+    public void onItemClick(int position) {
+        Intent intent = new Intent(this, DetailsActivity.class);
+        startActivity(intent);
     }
 }
