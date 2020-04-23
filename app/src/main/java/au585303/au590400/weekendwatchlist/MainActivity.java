@@ -9,12 +9,15 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -22,7 +25,9 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private boolean userLoggedIn = false;
     private TextView txt;
+    private EditText shareTxt;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
@@ -41,6 +47,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         txt = findViewById(R.id.textView);
+        shareTxt = findViewById(R.id.txtShareEmail);
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            txt.setText("User logged in: " + FirebaseAuth.getInstance().getCurrentUser().getEmail());
+        } else {
+            txt.setText("No user logged in");
+        }
+
         Button btn = findViewById(R.id.button);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -66,23 +79,65 @@ public class MainActivity extends AppCompatActivity {
         btnShare.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
-                Map<String, Object> dataToSave = new HashMap<>();
-                dataToSave.put("text", "This has been updated by: " + userEmail);
-                final DocumentReference documentReference = db.document("users/test2@mail.com");
-                documentReference.set(dataToSave).addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "onSuccess: Document has been saved!");
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "onFailure: Document was not saved!", e);
-                    }
-                });
+                String sharedEmail = shareTxt.getText().toString();
+                shareText(sharedEmail);
+
+
+//                String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+//                Map<String, Object> dataToSave = new HashMap<>();
+//                dataToSave.put("text", "This has been updated by: " + userEmail);
+//                final DocumentReference documentReference = db.document("users/test2@mail.com");
+//                documentReference.set(dataToSave).addOnSuccessListener(new OnSuccessListener<Void>() {
+//                    @Override
+//                    public void onSuccess(Void aVoid) {
+//                        Log.d(TAG, "onSuccess: Document has been saved!");
+//                    }
+//                }).addOnFailureListener(new OnFailureListener() {
+//                    @Override
+//                    public void onFailure(@NonNull Exception e) {
+//                        Log.w(TAG, "onFailure: Document was not saved!", e);
+//                    }
+//                });
             }
         });
+    }
+
+    private void shareText(String shareEmail) {
+        String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+
+        // Do this check before being to share movie to make sure the user exists. Otherwise it will create a new user in the database.
+        DocumentReference docRef = db.collection("users").document(shareEmail);
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                    } else {
+                        Log.d(TAG, "No such document");
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                }
+            }
+        });
+
+
+//        Map<String, Object> dataToSave = new HashMap<>();
+//        dataToSave.put("text", "This has been shared by: " + userEmail);
+//        db.collection("users/" + shareEmail + "/movies").add(dataToSave).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+//            @Override
+//            public void onSuccess(DocumentReference documentReference) {
+//                Log.d(TAG, "onSuccess: Document has been saved!");
+//                // display toast in here that tell movie has been shared
+//            }
+//        }).addOnFailureListener(new OnFailureListener() {
+//            @Override
+//            public void onFailure(@NonNull Exception e) {
+//                Log.w(TAG, "onFailure: Document was not saved!", e);
+//            }
+//        });
     }
 
     @Override
@@ -116,16 +171,31 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
+
                 // Read data
+                db.collection("users/" + userEmail + "/movies").addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                        if (queryDocumentSnapshots != null && !queryDocumentSnapshots.getDocuments().isEmpty()) {
+                            List<String> items = new ArrayList<>();
+                            for (DocumentSnapshot snapshot : queryDocumentSnapshots.getDocuments()) {
+                                String testString = snapshot.getData().get("text").toString();
+                                txt.setText(testString);
+                            }
+                        }
+                    }
+                });
+
+                // Check if user is logged in
                 documentReference.addSnapshotListener(new EventListener<DocumentSnapshot>() {
                     @Override
                     public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
                         if (documentSnapshot.exists()) {
-                            String testString = documentSnapshot.getString("text");
-                            txt.setText(testString);
+                            txt.setText("User logged in: " + FirebaseAuth.getInstance().getCurrentUser().getEmail());
                         }
                     }
                 });
+
 
                 userLoggedIn = true;
                 //If user is already logged in:
