@@ -1,9 +1,7 @@
 package au585303.au590400.weekendwatchlist;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Movie;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -71,8 +69,8 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.MyViewHolder> 
             view.setOnClickListener(this);
 
             //Set variables
-            title = view.findViewById(R.id.tv_Title);
-            year = view.findViewById(R.id.tv_Year);
+            title = view.findViewById(R.id.tvTitle);
+            year = view.findViewById(R.id.tvYear);
             rating = view.findViewById(R.id.tv_Rating);
             image = view.findViewById(R.id.iv_Movie);
         }
