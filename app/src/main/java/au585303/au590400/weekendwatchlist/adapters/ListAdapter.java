@@ -89,5 +89,33 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
     public interface OnItemClickListener {
         void onItemClick(int position);
+    //Create viewHolder
+    public class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        //Define variables
+        public TextView title;
+        public TextView year;
+        public TextView rating;
+        public ImageView image;
+
+        public MyViewHolder(View view) {
+            super(view);
+            view.setOnClickListener(this);
+
+            //Set variables
+            title = view.findViewById(R.id.tvTitle);
+            year = view.findViewById(R.id.tvYear);
+            rating = view.findViewById(R.id.tv_Rating);
+            image = view.findViewById(R.id.iv_Movie);
+        }
+
+        @Override
+        public void onClick(View view) {
+            //Start activity with intent
+            String movieClick = title.getText().toString();
+            Intent intent = new Intent(view.getContext(),DetailsActivity.class);
+            intent.putExtra(view.getContext().getResources().getString(R.string.IntentAdapterDetails),movieClick);
+            view.getContext().startActivity(intent);
+
+        }
     }
 }
