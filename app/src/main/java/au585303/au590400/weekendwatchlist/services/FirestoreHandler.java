@@ -15,12 +15,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FirestoreService {
-    private static final String TAG = "FirestoreService";
+public class FirestoreHandler {
+    private static final String TAG = "FirestoreHandler";
     private FirebaseUser firebaseUser;
     private FirebaseFirestore db;
 
-    public FirestoreService() {
+    public FirestoreHandler() {
         db = FirebaseFirestore.getInstance();
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
     }
@@ -29,7 +29,7 @@ public class FirestoreService {
         // Write data
         String userEmail = firebaseUser.getEmail();
         final Map<String, Object> dataToSave = new HashMap<>();
-        dataToSave.put("text2", "This was written by: " + userEmail);
+        dataToSave.put("text2", "New movie added by: " + userEmail);
         db.collection("users/" + userEmail + "/movies").add(dataToSave).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
             @Override
             public void onSuccess(DocumentReference documentReference) {

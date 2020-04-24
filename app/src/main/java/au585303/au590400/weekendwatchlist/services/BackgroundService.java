@@ -8,17 +8,25 @@ import android.util.Log;
 
 import java.util.List;
 
+import au585303.au590400.weekendwatchlist.models.Movie;
 import au585303.au590400.weekendwatchlist.models.MovieGsonObject;
 
 public class BackgroundService extends Service {
     //Declare variables
     private final IBinder myBinder = new LocalBinder();
     private final static String LOG = "BackgroundService";
-    private FirestoreService firestoreService;
+    private FirestoreHandler firestoreHandler;
+    private APIHandler apiHandler;
 
     //Constructor
     public BackgroundService() {
-        firestoreService = new FirestoreService();
+        firestoreHandler = new FirestoreHandler();
+        apiHandler = new APIHandler(this, new APIHandler.IApiResponseListener() {
+            @Override
+            public void onMovieReady(Movie movie) {
+                firestoreHandler.addMovie();
+            }
+        });
     }
 
     //Create a binder object
@@ -44,8 +52,9 @@ public class BackgroundService extends Service {
 
     public void addMovie() //TODO: Implement
     {
-        Log.d(LOG, "addMovie: ");
-        firestoreService.addMovie();
+        Log.d(LOG, "addMovie: add test, Joker");
+        apiHandler.addRequest("Joker");
+//        firestoreHandler.addMovie();
     }
 
     public MovieGsonObject getMovie() //TODO: Impelemnt + udskift MovieGsonObject

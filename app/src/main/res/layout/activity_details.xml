@@ -39,7 +39,7 @@
             app:srcCompat="@mipmap/ic_launcher" />
 
         <TextView
-            android:id="@+id/tvTitle"
+            android:id="@+id/txtTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
@@ -50,7 +50,7 @@
             app:layout_constraintTop_toBottomOf="@+id/ivPoster" />
 
         <TextView
-            android:id="@+id/tvYear"
+            android:id="@+id/txtYear"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
@@ -58,7 +58,7 @@
             android:layout_marginTop="16dp"
             android:text="@string/DefaultText"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
+            app:layout_constraintTop_toBottomOf="@+id/txtTitle" />
 
         <TextView
             android:id="@+id/tvIMdBRating"
@@ -78,8 +78,8 @@
             android:layout_marginStart="16dp"
             android:layout_marginLeft="16dp"
             android:text="@string/DefaultText"
-            app:layout_constraintStart_toEndOf="@+id/tvYear"
-            app:layout_constraintTop_toTopOf="@+id/tvYear" />
+            app:layout_constraintStart_toEndOf="@+id/txtYear"
+            app:layout_constraintTop_toTopOf="@+id/txtYear" />
 
         <TextView
             android:id="@+id/tvPlot"

@@ -59,44 +59,35 @@ public class MainActivity extends AppCompatActivity {
         initService();
         txt = findViewById(R.id.textView);
         shareTxt = findViewById(R.id.txtShareEmail);
+
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            txt.setText("User logged in: " + FirebaseAuth.getInstance().getCurrentUser().getEmail());
-            Intent intent = new Intent(MainActivity.this,ListActivity.class);
+            Intent intent = new Intent(MainActivity.this, ListActivity.class);
             startActivity(intent);
         } else {
-            txt.setText("No user logged in");
+            //If user is not logged in:
+            // Choose authentication providers
+            List<AuthUI.IdpConfig> providers = Arrays.asList(
+                    new AuthUI.IdpConfig.EmailBuilder().build());
+            // Create and launch sign-in intent
+            startActivityForResult(
+                    AuthUI.getInstance()
+                            .createSignInIntentBuilder()
+                            .setAvailableProviders(providers)
+                            .build(),
+                    RC_SIGN_IN);
         }
 
-        Button btn = findViewById(R.id.button);
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //If user is already logged in: //TODO: Ved ikke om dette er nødvendigt?
-                //Intent intent = new Intent(MainActivity.this,ListActivity.class);
-                //startActivity(intent);
-
-                //If user is not logged in:
-                // Choose authentication providers
-                List<AuthUI.IdpConfig> providers = Arrays.asList(
-                        new AuthUI.IdpConfig.EmailBuilder().build());
-                // Create and launch sign-in intent
-                startActivityForResult(
-                        AuthUI.getInstance()
-                                .createSignInIntentBuilder()
-                                .setAvailableProviders(providers)
-                                .build(),
-                        RC_SIGN_IN);
-            }
-        });
-        Button btnShare = findViewById(R.id.btnShare);
-        btnShare.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+//        Button btnShare = findViewById(R.id.btnShare);
+//        btnShare.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
 //                String sharedEmail = shareTxt.getText().toString();
 //                shareText(sharedEmail);
-            }
-        });
+//            }
+//        });
     }
+
+
 
     private void initService() {
         Log.d(TAG, "initService: setting up connection, starting and binding to service");
@@ -108,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
         serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
-                backgroundService = ((BackgroundService.LocalBinder)service).getService();
+                backgroundService = ((BackgroundService.LocalBinder) service).getService();
 //                backgroundService.addMovie(); this will crash if the user isn't logged in. tested that it works. commented out to not break on first startup
             }
 
@@ -188,30 +179,5 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == RC_SIGN_IN) {
-            IdpResponse response = IdpResponse.fromResultIntent(data);
-            Log.d(TAG, "RequestCode correct");
 
-            if (resultCode == RESULT_OK) {
-                Log.d(TAG, "Result code OK");
-                // Successfully signed in
-
-                userLoggedIn = true;
-                //If user is already logged in:
-                Intent intent = new Intent(MainActivity.this,ListActivity.class);
-                startActivity(intent);
-
-                // ...
-            } else {
-                // Sign in failed. If response is null the user canceled the
-                // sign-in flow using the back button. Otherwise check
-                // response.getError().getErrorCode() and handle the error.
-                // ...
-                userLoggedIn = false;
-            }
-        }
-    }
 }

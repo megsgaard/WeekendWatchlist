@@ -30,6 +30,9 @@ public class Movie {
         this.imdbRating = imdbRating;
     }
 
+    public Movie() {
+    }
+
 
     //Getter and Setter methods
     public String getRuntime() {
