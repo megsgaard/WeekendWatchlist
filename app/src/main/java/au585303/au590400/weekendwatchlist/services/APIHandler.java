@@ -50,9 +50,10 @@ public class APIHandler {
                     Log.d(TAG, "Json response was not null");
                     Movie movie = parseJsonWithGson(response.toString());
                     if (movie != null) {
-                        Log.d(TAG, "movie from parsing Json was not null");
                         movieToBeAdded = movie;
                         listener.onMovieReady(movieToBeAdded);
+                        Log.d(TAG, "movie from parsing Json:" + movie.getTitle());
+
                     } else {
                         Log.d(TAG, "movie from parsing Json was null");
                         movieToBeAdded = null;
@@ -94,7 +95,7 @@ public class APIHandler {
 
     // Listener interface
     public interface IApiResponseListener {
-        public void onMovieReady(Movie movie);
+        void onMovieReady(Movie movie);
     }
 
 }

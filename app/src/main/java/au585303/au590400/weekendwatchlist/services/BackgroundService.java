@@ -14,19 +14,29 @@ import au585303.au590400.weekendwatchlist.models.MovieGsonObject;
 public class BackgroundService extends Service {
     //Declare variables
     private final IBinder myBinder = new LocalBinder();
-    private final static String LOG = "BackgroundService";
+    private final static String TAG = "BackgroundService";
     private FirestoreHandler firestoreHandler;
     private APIHandler apiHandler;
+    private APIHandler.IApiResponseListener listener;
+
 
     //Constructor
     public BackgroundService() {
         firestoreHandler = new FirestoreHandler();
-        apiHandler = new APIHandler(this, new APIHandler.IApiResponseListener() {
+        listener = new APIHandler.IApiResponseListener() {
             @Override
             public void onMovieReady(Movie movie) {
-                firestoreHandler.addMovie();
-            }
-        });
+                Log.d(TAG, "onMovieReady Enter");
+           }
+       };
+       apiHandler = new APIHandler(this, listener);
+
+        //apiHandler = new APIHandler(this, new APIHandler.IApiResponseListener() {
+        //    @Override
+        //    public void onMovieReady(Movie movie) {
+        //        firestoreHandler.addMovie();
+        //    }
+        //});
     }
 
     //Create a binder object
@@ -39,7 +49,7 @@ public class BackgroundService extends Service {
     //OnBind method
     @Override
     public IBinder onBind(Intent intent) {
-        Log.d(LOG,"Activity called binding method");
+        Log.d(TAG,"Activity called binding method");
         return myBinder;
     }
 
@@ -50,10 +60,10 @@ public class BackgroundService extends Service {
         return null;
     }
 
-    public void addMovie() //TODO: Implement
+    public void addMovie(String searchWord) //TODO: Implement
     {
-        Log.d(LOG, "addMovie: add test, Joker");
-        apiHandler.addRequest("Joker");
+        Log.d(TAG, "addMovie: "+searchWord);
+        apiHandler.addRequest(searchWord);
 //        firestoreHandler.addMovie();
     }
 
