@@ -10,6 +10,7 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -57,6 +58,7 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
     private ListenerRegistration itemsListener;
     private ServiceConnection serviceConnection;
     private BackgroundService backgroundService;
+
 
     //widgets
     private RecyclerView recyclerView;
@@ -121,34 +123,11 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
-        //Inspiration from: https://developer.android.com/guide/topics/ui/dialogs.html
-        //Test af button_add //TODO: FHJ: Overvej om alt logikken skal flyttes ned i en metode for sig
         buttonAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "onClick: Enter");
-
-                final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(ListActivity.this);
-                final LayoutInflater inflater = getLayoutInflater();
-                final View view = inflater.inflate(R.layout.search_dialog,null);
-                alertDialogBuilder.setView(view)
-                        .setPositiveButton(R.string.add_movie, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                EditText searchWord = view.findViewById(R.id.et_SearchWord);
-                                backgroundService.addMovie(searchWord.getText().toString());
-                            }
-                        })
-                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
-                            }
-                        });
-
-                alertDialogBuilder.show();
-                Log.d(TAG, "onClick: Leave");
-                //backgroundService.addMovie("Joker");
+                OpenAlertDialog();
             }
         });
     }
@@ -208,6 +187,31 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
     private void setActionBar() {
         String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
         getSupportActionBar().setTitle(userEmail);
+    }
+
+    //Inspiration from: https://developer.android.com/guide/topics/ui/dialogs.html
+    private void OpenAlertDialog()
+    {
+        final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(ListActivity.this);
+        final LayoutInflater inflater = getLayoutInflater();
+        final View view = inflater.inflate(R.layout.search_dialog,null);
+        alertDialogBuilder.setView(view)
+                .setPositiveButton(R.string.add_movie, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        EditText searchWord = view.findViewById(R.id.etSearchWord);
+                        backgroundService.addMovie(searchWord.getText().toString());
+                    }
+                })
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+                alertDialogBuilder.show();
+        //backgroundService.addMovie("Joker");
     }
 
 

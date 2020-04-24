@@ -5,6 +5,8 @@
     <string name ="hint_searchword">The Secret Life of Bees</string>
     <string name ="add_movie">Add movie to list</string>
     <string name ="cancel">Cancel</string>
+    <string name ="dialog_text">Add a movie to your list by writing the title below</string>
+
 
 
 </resources>
