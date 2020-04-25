@@ -55,35 +55,14 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
     private static final String TAG = "ListActivity";
     private static final int RC_SIGN_IN = 101;
     private FirebaseFirestore fireStore = FirebaseFirestore.getInstance();
-    private ListenerRegistration itemsListener;
     private ServiceConnection serviceConnection;
     private BackgroundService backgroundService;
     private List<Movie> movies = new ArrayList<>();
 
-
     //widgets
     private RecyclerView recyclerView;
-    private RecyclerView.Adapter adapter;
+    private ListAdapter adapter;
     private FloatingActionButton buttonAdd;
-
-    //TODO: FHJ: Læg disse i den klasse, hvor det skal foregå
-//    private APIHandler.IApiResponseListener listener;
-//    private APIHandler apiHandler;
-
-
-
-
-    //Constructor //TODO: FHJ: Fjern denne? Når indholdet er flyttet derhen hvor det skal være
-//    public ListActivity() {
-//        //Inspiration for creating a response listener is found here: https://guides.codepath.com/android/Creating-Custom-Listeners
-//        listener = new APIHandler.IApiResponseListener() {
-//            @Override
-//            public void onMovieReady(Movie movie) {
-//                Log.d(TAG, "onMovieReady Enter");
-//            }
-//        };
-//        apiHandler = new APIHandler(this, listener);
-//    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,22 +81,6 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
         //Set widgets
         recyclerView = findViewById(R.id.recyclerView);
         buttonAdd = findViewById(R.id.fabAdd);
-
-
-        //List af film til test af adapter //TODO: Slet når færdig
-
-        Movie movie1 = new Movie();
-        movie1.setTitle("Joker");
-        movie1.setYear("2019");
-        Movie movie2 = new Movie();
-        movie2.setTitle("FRIDA");
-        movie2.setYear("2019");
-        Movie movie3 = new Movie();
-        movie3.setTitle("Mathias");
-        movie3.setYear("2019");
-        movies.add(movie1);
-        movies.add(movie2);
-        movies.add(movie3);
 
         //Set up adapter and recyclerview
         adapter = new ListAdapter(movies, this);
@@ -201,7 +164,8 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         EditText searchWord = view.findViewById(R.id.etSearchWord);
-                        backgroundService.addMovie(searchWord.getText().toString());
+                        String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+                        backgroundService.addMovie(searchWord.getText().toString(), userEmail);
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -244,27 +208,23 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
     @Override
     protected void onResume() {
         super.onResume();
-        itemsListener = fireStore.collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getEmail()).collection("movies").addSnapshotListener(this,
-                new EventListener<QuerySnapshot>() {
-                    @Override
-                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                        if (queryDocumentSnapshots != null && !queryDocumentSnapshots.getDocuments().isEmpty()) {
-                            for (DocumentSnapshot snapshot : queryDocumentSnapshots.getDocuments()) {
-                                // TODO: MEG: Update this logic
-                                Movie test = snapshot.toObject(Movie.class);
-                                movies.add(test);
-                                adapter.notifyDataSetChanged();
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            fireStore.collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getEmail()).collection("movies").addSnapshotListener(this,
+                    new EventListener<QuerySnapshot>() {
+                        @Override
+                        public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                            if (queryDocumentSnapshots != null && !queryDocumentSnapshots.getDocuments().isEmpty()) {
+                                List<Movie> movies = new ArrayList<>();
+                                for (DocumentSnapshot snapshot : queryDocumentSnapshots.getDocuments()) {
+                                    Movie movie = snapshot.toObject(Movie.class);
+                                    movies.add(movie);
+                                }
+                                adapter.setMovies(movies);
                             }
                         }
                     }
-                }
-        );
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        itemsListener.remove();
+            );
+        }
     }
 
     @Override

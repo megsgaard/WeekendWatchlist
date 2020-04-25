@@ -33,7 +33,7 @@ public class APIHandler {
     }
 
     // AddRequest to queue method
-    public void addRequest(final String searchWord) {
+    public void addRequest(final String searchWord, final String userEmail) {
         Log.d(TAG, "addRequest Enter");
         if (requestQueue == null) {
             Log.d(TAG, "myRequestQueue was null");
@@ -46,12 +46,12 @@ public class APIHandler {
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
-                if (response != null) {
+                if (!response.toString().contains("Error")) {
                     Log.d(TAG, "Json response was not null");
                     Movie movie = parseJsonWithGson(response.toString());
                     if (movie != null) {
                         movieToBeAdded = movie;
-                        listener.onMovieReady(movieToBeAdded);
+                        listener.onMovieReady(movieToBeAdded, userEmail);
                         Log.d(TAG, "movie from parsing Json:" + movie.getTitle());
 
                     } else {
@@ -88,14 +88,21 @@ public class APIHandler {
         MovieGsonObject movieGsonObject = gson.fromJson(jsonString, MovieGsonObject.class);
 
         // Create new Movie based on MovieGsonObject
-        Movie movie = new Movie(movieGsonObject.getTitle(), movieGsonObject.getYear(), movieGsonObject.getGenre(), movieGsonObject.getRuntime(), movieGsonObject.getDirector(), movieGsonObject.getWriter(), movieGsonObject.getActors(), movieGsonObject.getPlot(), movieGsonObject.getAwards(), movieGsonObject.getPoster(), movieGsonObject.getImdbRating());
+        // TODO: MEG: add null checking
+        String imageUrl;
+        if (movieGsonObject.getPoster().equals("N/A")) {
+            imageUrl = "https://upload.wikimedia.org/wikipedia/commons/f/fc/No_picture_available.png";
+        } else {
+            imageUrl = movieGsonObject.getPoster();
+        }
+        Movie movie = new Movie(movieGsonObject.getTitle(), movieGsonObject.getYear(), movieGsonObject.getGenre(), movieGsonObject.getRuntime(), movieGsonObject.getDirector(), movieGsonObject.getWriter(), movieGsonObject.getActors(), movieGsonObject.getPlot(), movieGsonObject.getAwards(), imageUrl, movieGsonObject.getImdbRating());
         Log.d(TAG, movie.getPoster());
         return movie;
     }
 
     // Listener interface
     public interface IApiResponseListener {
-        void onMovieReady(Movie movie);
+        void onMovieReady(Movie movie, String userEmail);
     }
 
 }

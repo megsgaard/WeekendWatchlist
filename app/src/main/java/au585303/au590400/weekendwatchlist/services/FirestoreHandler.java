@@ -1,6 +1,5 @@
 package au585303.au590400.weekendwatchlist.services;
 
-import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -9,11 +8,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import au585303.au590400.weekendwatchlist.models.Movie;
 
@@ -29,9 +24,8 @@ class FirestoreHandler {
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
     }
 
-    void addMovie(Movie movie) {
+    void addMovie(Movie movie, String userEmail) {
         // Save movie in Firestore
-        String userEmail = firebaseUser.getEmail();
         String movieId = movie.getTitle().toLowerCase(); // Title of the movie will be the id of the document in Firestore. Since the app doesn't support multiple movies with the same title, this is okay for now.
         db.collection(USERS).document(userEmail).collection(MOVIES).document(movieId).set(movie).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override

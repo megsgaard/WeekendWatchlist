@@ -10,6 +10,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.List;
 
 import au585303.au590400.weekendwatchlist.R;
@@ -24,6 +26,11 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     public ListAdapter(List<Movie> movies, OnItemClickListener onItemClickListener) {
         this.movies = movies;
         this.onItemClickListener = onItemClickListener;
+    }
+
+    public void setMovies(List<Movie> movies) {
+        this.movies = movies;
+        notifyDataSetChanged();
     }
 
     // Create viewHolder
@@ -66,10 +73,10 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         Movie movie = movies.get(position);
         holder.title.setText(movie.getTitle());
         holder.year.setText(movie.getYear());
-//        Picasso.get().load(movie.getPoster()).into(holder.image);
-
+        holder.rating.setText(movie.getImdbRating());
+        String posterUrl = movie.getPoster();
+        Picasso.get().load(movie.getPoster()).into(holder.image);
         //TODO: mangler at lave noget med den personlige rating
-        Log.d(LOG, "item.imageURL");
     }
 
     @Override

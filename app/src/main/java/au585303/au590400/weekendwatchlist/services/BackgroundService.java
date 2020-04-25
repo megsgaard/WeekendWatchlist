@@ -12,7 +12,7 @@ import au585303.au590400.weekendwatchlist.models.Movie;
 import au585303.au590400.weekendwatchlist.models.MovieGsonObject;
 
 public class BackgroundService extends Service {
-    //Declare variables
+    // Declare variables
     private final IBinder myBinder = new LocalBinder();
     private final static String TAG = "BackgroundService";
     private FirestoreHandler firestoreHandler;
@@ -20,54 +20,44 @@ public class BackgroundService extends Service {
     private APIHandler.IApiResponseListener listener;
 
 
-    //Constructor
+    // Constructor
     public BackgroundService() {
         firestoreHandler = new FirestoreHandler();
         listener = new APIHandler.IApiResponseListener() {
             @Override
-            public void onMovieReady(Movie movie) {
-                Log.d(TAG, "onMovieReady Enter");
-           }
-       };
-       apiHandler = new APIHandler(this, listener);
-
-        //apiHandler = new APIHandler(this, new APIHandler.IApiResponseListener() {
-        //    @Override
-        //    public void onMovieReady(Movie movie) {
-        //        firestoreHandler.addMovie(movie);
-        //    }
-        //});
+            public void onMovieReady(Movie movie, String userEmail) {
+                Log.d(TAG, "onMovieReady Enter: adding movie to Firestore");
+                firestoreHandler.addMovie(movie, userEmail);
+            }
+        };
+        apiHandler = new APIHandler(this, listener);
     }
 
-    //Create a binder object
+    // Create a binder object
     public class LocalBinder extends Binder {
-        public BackgroundService getService(){
+        public BackgroundService getService() {
             return BackgroundService.this;
         }
     }
 
-    //OnBind method
+    // OnBind method
     @Override
     public IBinder onBind(Intent intent) {
-        Log.d(TAG,"Activity called binding method");
+        Log.d(TAG, "Activity called binding method");
         return myBinder;
     }
 
 
-    //Methods connecting to database
+    // Methods connecting to database
     public List<MovieGsonObject> getAll() //TODO: Implement + udskift MovieGsonObject
     {
         return null;
     }
 
-    public void addMovie(String searchWord) //TODO: Implement
+    public void addMovie(String searchWord, String userEmail) //TODO: Implement
     {
-//        Log.d(TAG, "addMovie: "+searchWord);
-//        apiHandler.addRequest(searchWord);
-        Movie movie1 = new Movie();
-        movie1.setTitle("Joker");
-        movie1.setYear("2019");
-        firestoreHandler.addMovie(movie1);
+        Log.d(TAG, "addMovie: " + searchWord);
+        apiHandler.addRequest(searchWord, userEmail);
     }
 
     public MovieGsonObject getMovie() //TODO: Impelemnt + udskift MovieGsonObject
