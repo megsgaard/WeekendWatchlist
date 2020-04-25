@@ -56,7 +56,6 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate called");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        initService();
         txt = findViewById(R.id.textView);
         shareTxt = findViewById(R.id.txtShareEmail);
 
@@ -85,29 +84,6 @@ public class MainActivity extends AppCompatActivity {
 //                shareText(sharedEmail);
 //            }
 //        });
-    }
-
-
-
-    private void initService() {
-        Log.d(TAG, "initService: setting up connection, starting and binding to service");
-        setupServiceConnection();
-        bindService(new Intent(this, BackgroundService.class), serviceConnection, Context.BIND_AUTO_CREATE);
-    }
-
-    private void setupServiceConnection() {
-        serviceConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                backgroundService = ((BackgroundService.LocalBinder) service).getService();
-//                backgroundService.addMovie(); this will crash if the user isn't logged in. tested that it works. commented out to not break on first startup
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                backgroundService = null;
-            }
-        };
     }
 
 

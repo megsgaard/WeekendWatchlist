@@ -24,7 +24,7 @@ public class BackgroundService extends Service {
         apiHandler = new APIHandler(this, new APIHandler.IApiResponseListener() {
             @Override
             public void onMovieReady(Movie movie) {
-                firestoreHandler.addMovie();
+                firestoreHandler.addMovie(movie);
             }
         });
     }
@@ -52,9 +52,12 @@ public class BackgroundService extends Service {
 
     public void addMovie() //TODO: Implement
     {
-        Log.d(LOG, "addMovie: add test, Joker");
-        apiHandler.addRequest("Joker");
-//        firestoreHandler.addMovie();
+//        Log.d(LOG, "addMovie: add test, Joker");
+//        apiHandler.addRequest("Joker");
+        Movie movie1 = new Movie();
+        movie1.setTitle("Joker");
+        movie1.setYear("2019");
+        firestoreHandler.addMovie(movie1);
     }
 
     public MovieGsonObject getMovie() //TODO: Impelemnt + udskift MovieGsonObject

@@ -53,6 +53,7 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
     private ListenerRegistration itemsListener;
     private ServiceConnection serviceConnection;
     private BackgroundService backgroundService;
+    private List<Movie> movies = new ArrayList<>();
 
     //widgets
     private RecyclerView recyclerView;
@@ -98,7 +99,7 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
 
 
         //List af film til test af adapter //TODO: Slet når færdig
-        List<Movie> movies = new ArrayList<>();
+
         Movie movie1 = new Movie();
         movie1.setTitle("Joker");
         movie1.setYear("2019");
@@ -208,19 +209,21 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
         }
     }
 
+    // TODO: MEG: Maybe this should be moved to onStart() instead?
     @Override
     protected void onResume() {
         super.onResume();
-        itemsListener = fireStore.collection("Items").addSnapshotListener(
+        itemsListener = fireStore.collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getEmail()).collection("movies").addSnapshotListener(this,
                 new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
                         if (queryDocumentSnapshots != null && !queryDocumentSnapshots.getDocuments().isEmpty()) {
-                            List<String> items = new ArrayList<>();
                             for (DocumentSnapshot snapshot : queryDocumentSnapshots.getDocuments()) {
-                                items.add(snapshot.getData().get("text").toString());
+                                // TODO: MEG: Update this logic
+                                Movie test = snapshot.toObject(Movie.class);
+                                movies.add(test);
+                                adapter.notifyDataSetChanged();
                             }
-                            //adapter.setItems(items);
                         }
                     }
                 }
