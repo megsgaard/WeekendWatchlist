@@ -1,5 +1,12 @@
 <resources>
     <string name="app_name">WeekendWatchlist</string>
-    <string name ="IntentAdapterDetails">IntentAdapterDetails</string>
-    <string name ="DefaultText">TEXT TO BE FILLED</string>
+    <string name ="intent_adapter_details">IntentAdapterDetails</string>
+    <string name ="default_text">TEXT TO BE FILLED</string>
+    <string name ="hint_searchword">The Secret Life of Bees</string>
+    <string name ="add_movie">Add movie to list</string>
+    <string name ="cancel">Cancel</string>
+    <string name ="dialog_text">Add a movie to your list by writing the title below</string>
+
+
+
 </resources>

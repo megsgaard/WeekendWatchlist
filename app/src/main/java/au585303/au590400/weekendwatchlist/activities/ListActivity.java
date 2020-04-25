@@ -2,16 +2,21 @@ package au585303.au590400.weekendwatchlist.activities;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -54,6 +59,7 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
     private ServiceConnection serviceConnection;
     private BackgroundService backgroundService;
     private List<Movie> movies = new ArrayList<>();
+
 
     //widgets
     private RecyclerView recyclerView;
@@ -118,11 +124,11 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
-        //Test af button_add //TODO: FHJ: Lav denne som den rigtigt skal være
         buttonAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                backgroundService.addMovie();
+                Log.d(TAG, "onClick: Enter");
+                OpenAlertDialog();
             }
         });
     }
@@ -182,6 +188,31 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
     private void setActionBar() {
         String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
         getSupportActionBar().setTitle(userEmail);
+    }
+
+    //Inspiration from: https://developer.android.com/guide/topics/ui/dialogs.html
+    private void OpenAlertDialog()
+    {
+        final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(ListActivity.this);
+        final LayoutInflater inflater = getLayoutInflater();
+        final View view = inflater.inflate(R.layout.search_dialog,null);
+        alertDialogBuilder.setView(view)
+                .setPositiveButton(R.string.add_movie, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        EditText searchWord = view.findViewById(R.id.etSearchWord);
+                        backgroundService.addMovie(searchWord.getText().toString());
+                    }
+                })
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+                alertDialogBuilder.show();
+        //backgroundService.addMovie("Joker");
     }
 
 
