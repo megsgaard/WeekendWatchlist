@@ -64,7 +64,7 @@ public class BackgroundService extends Service {
 
 
     // Methods connecting to database
-    public List<MovieGsonObject> getAll() //TODO: Implement + udskift MovieGsonObject
+    public List<Movie> getAll() //TODO: Implement
     {
         return null;
     }
@@ -75,10 +75,10 @@ public class BackgroundService extends Service {
         apiHandler.addRequest(searchWord, userEmail);
     }
 
-    public Movie getMovie(String movieId) //TODO: Impelemnt + udskift MovieGsonObject
+    public Movie getMovie(String movieId)
     {
         firestoreHandler.getMovie(movieId);
-        Log.d(TAG, "getMovie: called"); //TODO: FHJ: Denne bliver kaldt før getMovie i Firestore kaldet er færdigt. Derfor er movie null. Fix
+        Log.d(TAG, "getMovie: called");
         return null;
     }
 
@@ -100,8 +100,8 @@ public class BackgroundService extends Service {
 
     }
 
-    public void deleteMovie() //TODO: Implement
+    public void deleteMovie(String movie) //TODO: Implement
     {
-
+        firestoreHandler.deleteMovie(movie);
     }
 }

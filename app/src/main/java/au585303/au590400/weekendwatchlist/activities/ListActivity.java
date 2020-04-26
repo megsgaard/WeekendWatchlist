@@ -51,7 +51,7 @@ import au585303.au590400.weekendwatchlist.services.BackgroundService;
 
 import static android.widget.Toast.LENGTH_LONG;
 
-public class ListActivity extends AppCompatActivity implements ListAdapter.OnItemClickListener {
+public class ListActivity extends AppCompatActivity implements ListAdapter.OnItemClickListener, ListAdapter.OnItemLongClickListener  {
     private static final String TAG = "ListActivity";
     private static final int RC_SIGN_IN = 101;
     private FirebaseFirestore fireStore = FirebaseFirestore.getInstance();
@@ -83,7 +83,7 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
         buttonAdd = findViewById(R.id.fabAdd);
 
         //Set up adapter and recyclerview
-        adapter = new ListAdapter(movies, this);
+        adapter = new ListAdapter(movies, this,this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
@@ -233,5 +233,28 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
         Intent intent = new Intent(this, DetailsActivity.class);
         intent.putExtra(getResources().getString(R.string.intent_extra_movietitle), movie.getTitle());
         startActivity(intent);
+    }
+
+    @Override
+    public void onItemLongClick(int position) {
+        final Movie movie = movies.get(position);
+
+        //Create AlertDialog to make safe delete
+        final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(ListActivity.this);
+        alertDialogBuilder.setMessage(R.string.delete_question)
+        .setPositiveButton(R.string.delete_yes, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                backgroundService.deleteMovie(movie.getTitle());
+            }
+        }).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        alertDialogBuilder.show();
+        //backgroundService.deleteMovie(movie.getTitle());
     }
 }

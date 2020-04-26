@@ -53,6 +53,7 @@ class FirestoreHandler {
         //Log.d(TAG, "addMovie: "+firebaseUser.getEmail() + "vs " +userEmail);
     }
 
+    //https://firebase.google.com/docs/firestore/query-data/get-data#java
     void getMovie(String movieId){
         String movie = movieId.toLowerCase();
         collectionReference.document(movie).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -73,6 +74,26 @@ class FirestoreHandler {
         });
 
         //return fetchedMovie;
+    }
+
+    //https://firebase.google.com/docs/firestore/manage-data/delete-data
+    public void deleteMovie(String movieId)
+    {
+        String movie = movieId.toLowerCase();
+        collectionReference.document(movie)
+                .delete()
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "DocumentSnapshot successfully deleted!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, "Error deleting document", e);
+                    }
+                });
     }
 
     // Listener interface

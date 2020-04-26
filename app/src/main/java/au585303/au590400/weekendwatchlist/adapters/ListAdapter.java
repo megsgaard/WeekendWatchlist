@@ -1,6 +1,5 @@
 package au585303.au590400.weekendwatchlist.adapters;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,11 +20,13 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     // Defining variables
     private static final String LOG = "ListAdapter";
     private OnItemClickListener onItemClickListener;
+    private OnItemLongClickListener onItemLongClickListener;
     private List<Movie> movies;
 
-    public ListAdapter(List<Movie> movies, OnItemClickListener onItemClickListener) {
+    public ListAdapter(List<Movie> movies, OnItemClickListener onItemClickListener, OnItemLongClickListener onItemLongClickListener) {
         this.movies = movies;
         this.onItemClickListener = onItemClickListener;
+        this.onItemLongClickListener = onItemLongClickListener;
     }
 
     public void setMovies(List<Movie> movies) {
@@ -34,15 +35,16 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     }
 
     // Create viewHolder
-    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
         // Define variables
         private TextView title;
         private TextView year;
         private TextView rating;
         private ImageView image;
         private OnItemClickListener onItemClickListener;
+        private OnItemLongClickListener onItemLongClickListener;
 
-        private ViewHolder(View view, OnItemClickListener onItemClickListener) {
+        private ViewHolder(View view, OnItemClickListener onItemClickListener, OnItemLongClickListener onItemLongClickListener) {
             super(view);
             // Set variables
             title = view.findViewById(R.id.txtTitle);
@@ -50,12 +52,18 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
             rating = view.findViewById(R.id.txtRating);
             image = view.findViewById(R.id.imgMovie);
             this.onItemClickListener = onItemClickListener;
+            this.onItemLongClickListener = onItemLongClickListener;
             view.setOnClickListener(this);
+            view.setOnLongClickListener(this);
         }
 
         @Override
         public void onClick(View view) {
             onItemClickListener.onItemClick(getAdapterPosition());
+        }
+        @Override
+        public boolean onLongClick(View view){ onItemLongClickListener.onItemLongClick(getAdapterPosition());
+            return false;
         }
     }
 
@@ -64,7 +72,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         // Set up viewholder
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.movie_item, parent, false);
-        return new ViewHolder(view, onItemClickListener);
+        return new ViewHolder(view, onItemClickListener, onItemLongClickListener);
     }
 
     @Override
@@ -86,6 +94,10 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
     public interface OnItemClickListener {
         void onItemClick(int position);
+    }
+
+    public interface OnItemLongClickListener{
+        void onItemLongClick(int position);
     }
 }
 
