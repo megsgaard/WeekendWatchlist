@@ -6,6 +6,8 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import java.util.List;
 
 import au585303.au590400.weekendwatchlist.models.Movie;
@@ -15,22 +17,35 @@ public class BackgroundService extends Service {
     // Declare variables
     private final IBinder myBinder = new LocalBinder();
     private final static String TAG = "BackgroundService";
+    public final static String BROADCAST_MOVIE_READY = "au585303.au590400.weekendwatchlist.BROADCAST_MOVIE_READY";
     private FirestoreHandler firestoreHandler;
     private APIHandler apiHandler;
-    private APIHandler.IApiResponseListener listener;
+    private APIHandler.IApiResponseListener apiResponseListener;
+    private FirestoreHandler.IMovieResponseListener movieResponseListener;
+    private Movie fetchedMovie;
 
 
     // Constructor
     public BackgroundService() {
-        firestoreHandler = new FirestoreHandler();
-        listener = new APIHandler.IApiResponseListener() {
+        apiResponseListener = new APIHandler.IApiResponseListener() {
             @Override
             public void onMovieReady(Movie movie, String userEmail) {
                 Log.d(TAG, "onMovieReady Enter: adding movie to Firestore");
-                firestoreHandler.addMovie(movie, userEmail);
+                firestoreHandler.addMovie(movie/*, userEmail*/);
             }
         };
-        apiHandler = new APIHandler(this, listener);
+        movieResponseListener = new FirestoreHandler.IMovieResponseListener() {
+            @Override
+            public void onMovieReady(Movie movie) {
+                Log.d(TAG, "onMovieReady: "+ movie.getTitle());
+                broadcastMovieReady();
+                fetchedMovie = movie;
+            }
+        };
+
+        apiHandler = new APIHandler(this, apiResponseListener);
+        firestoreHandler = new FirestoreHandler(movieResponseListener);
+
     }
 
     // Create a binder object
@@ -60,9 +75,24 @@ public class BackgroundService extends Service {
         apiHandler.addRequest(searchWord, userEmail);
     }
 
-    public MovieGsonObject getMovie() //TODO: Impelemnt + udskift MovieGsonObject
+    public Movie getMovie(String movieId) //TODO: Impelemnt + udskift MovieGsonObject
     {
+        firestoreHandler.getMovie(movieId);
+        Log.d(TAG, "getMovie: called"); //TODO: FHJ: Denne bliver kaldt før getMovie i Firestore kaldet er færdigt. Derfor er movie null. Fix
         return null;
+    }
+
+    public Movie getReadyMovie()
+    {
+        return fetchedMovie;
+    }
+
+    private void broadcastMovieReady()
+    {
+        Log.d(TAG, "broadcastMovieReady: Enter");
+        Intent broadcastIntent = new Intent();
+        broadcastIntent.setAction(BROADCAST_MOVIE_READY);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
     }
 
     public void updateMovie() //TODO: Implement

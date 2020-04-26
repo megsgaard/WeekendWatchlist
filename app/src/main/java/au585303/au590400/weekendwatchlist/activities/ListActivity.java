@@ -165,7 +165,7 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
                     public void onClick(DialogInterface dialog, int which) {
                         EditText searchWord = view.findViewById(R.id.etSearchWord);
                         String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
-                        backgroundService.addMovie(searchWord.getText().toString(), userEmail);
+                        backgroundService.addMovie(searchWord.getText().toString(), userEmail); //TODO: FHJ: Tror ikke emailen er nødvendig
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -214,7 +214,7 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
                         @Override
                         public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
                             if (queryDocumentSnapshots != null && !queryDocumentSnapshots.getDocuments().isEmpty()) {
-                                List<Movie> movies = new ArrayList<>();
+                                /*List<Movie>*/ movies = new ArrayList<>();
                                 for (DocumentSnapshot snapshot : queryDocumentSnapshots.getDocuments()) {
                                     Movie movie = snapshot.toObject(Movie.class);
                                     movies.add(movie);
@@ -229,7 +229,9 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
 
     @Override
     public void onItemClick(int position) {
+        Movie movie = movies.get(position);
         Intent intent = new Intent(this, DetailsActivity.class);
+        intent.putExtra(getResources().getString(R.string.intent_extra_movietitle), movie.getTitle());
         startActivity(intent);
     }
 }

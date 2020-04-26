@@ -30,6 +30,7 @@ public class Movie {
         this.imdbRating = imdbRating;
     }
 
+    //Empty constructor
     public Movie() {
     }
 
