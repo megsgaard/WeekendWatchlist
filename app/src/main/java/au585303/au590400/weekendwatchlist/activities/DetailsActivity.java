@@ -23,6 +23,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.squareup.picasso.Picasso;
 
 import au585303.au590400.weekendwatchlist.R;
@@ -55,6 +56,7 @@ public class DetailsActivity extends AppCompatActivity {
         contentView = findViewById(R.id.details_content);
         contentView.setVisibility(View.GONE); // Hide the scroll view while loading
         initService();
+        setActionBar();
 
         //Set widgets
         title = findViewById(R.id.txtTitle);
@@ -104,6 +106,11 @@ public class DetailsActivity extends AppCompatActivity {
         IntentFilter filter = new IntentFilter();
         filter.addAction(BackgroundService.BROADCAST_MOVIE_READY);
         LocalBroadcastManager.getInstance(this).registerReceiver(onServiceMovieReady, filter);
+    }
+
+    private void setActionBar() {
+        String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+        getSupportActionBar().setTitle(userEmail);
     }
 
     private void openShareDialog() {

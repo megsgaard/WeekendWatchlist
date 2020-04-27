@@ -161,11 +161,12 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
         final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(ListActivity.this);
         final LayoutInflater inflater = getLayoutInflater();
         final View view = inflater.inflate(R.layout.search_dialog,null);
+        alertDialogBuilder.setTitle(R.string.dialog_text);
         alertDialogBuilder.setView(view)
                 .setPositiveButton(R.string.add_movie, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        EditText searchWord = view.findViewById(R.id.etSearchWord);
+                        EditText searchWord = view.findViewById(R.id.txtSearchWord);
                         String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
                         backgroundService.addMovie(searchWord.getText().toString(), userEmail); //TODO: FHJ: Tror ikke emailen er nødvendig
                     }
@@ -254,7 +255,12 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        adapter.sortMoviesByRating();
+        if (item.getItemId() == R.id.app_bar_sortByRating) {
+            adapter.sortMoviesByRating();
+        }
+        if (item.getItemId() == R.id.app_bar_filterByCategory) {
+            //implement adapter.filterByCategory();
+        }
         return super.onOptionsItemSelected(item);
     }
 

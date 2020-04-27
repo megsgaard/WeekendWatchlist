@@ -27,7 +27,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> im
     private OnItemLongClickListener onItemLongClickListener;
     private List<Movie> movies;
     private List<Movie> fullListOfMovies;
-    private boolean sortedByAscending = false;
+    private boolean sortedByDescending = false;
 
     public ListAdapter(List<Movie> movies, OnItemClickListener onItemClickListener, OnItemLongClickListener onItemLongClickListener) {
         this.movies = movies;
@@ -44,14 +44,14 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> im
     // Inspired by this: https://howtodoinjava.com/sort/collections-sort/
     public void sortMoviesByRating() {
         List<Movie> sortedMovies = new ArrayList<>();
-        if (!sortedByAscending) {
-            Collections.sort(movies);
-            sortedMovies.addAll(movies);
-            sortedByAscending = true;
-        } else {
+        if (!sortedByDescending) {
             Collections.sort(movies, Collections.reverseOrder());
             sortedMovies.addAll(movies);
-            sortedByAscending = false;
+            sortedByDescending = true;
+        } else {
+            Collections.sort(movies);
+            sortedMovies.addAll(movies);
+            sortedByDescending = false;
         }
         movies.clear();
         movies.addAll(sortedMovies);
