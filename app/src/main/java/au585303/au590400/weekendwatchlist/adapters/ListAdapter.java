@@ -3,6 +3,8 @@ package au585303.au590400.weekendwatchlist.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -11,17 +13,19 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import au585303.au590400.weekendwatchlist.R;
 import au585303.au590400.weekendwatchlist.models.Movie;
 
-public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
+public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> implements Filterable {
     // Defining variables
     private static final String LOG = "ListAdapter";
     private OnItemClickListener onItemClickListener;
     private OnItemLongClickListener onItemLongClickListener;
     private List<Movie> movies;
+    private List<Movie> fullListOfMovies;
 
     public ListAdapter(List<Movie> movies, OnItemClickListener onItemClickListener, OnItemLongClickListener onItemLongClickListener) {
         this.movies = movies;
@@ -31,8 +35,41 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
     public void setMovies(List<Movie> movies) {
         this.movies = movies;
+        fullListOfMovies = new ArrayList<>(movies);
         notifyDataSetChanged();
     }
+
+    @Override
+    public Filter getFilter() {
+        return movieFilter;
+    }
+
+    private Filter movieFilter = new Filter() {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            List<Movie> filterList = new ArrayList<>();
+            if (constraint == null || constraint.length() == 0) {
+                filterList.addAll(fullListOfMovies);
+            } else {
+                String filterPattern = constraint.toString().toLowerCase().trim();
+                for (Movie movie : fullListOfMovies) {
+                    if (movie.getTitle().toLowerCase().contains(filterPattern)) {
+                        filterList.add(movie);
+                    }
+                }
+            }
+            FilterResults results = new FilterResults();
+            results.values = filterList;
+            return  results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            movies.clear();
+            movies.addAll((List)results.values);
+            notifyDataSetChanged();
+        }
+    };
 
     // Create viewHolder
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
