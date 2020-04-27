@@ -51,6 +51,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> im
         } else {
             Collections.sort(movies, Collections.reverseOrder());
             sortedMovies.addAll(movies);
+            sortedByAscending = false;
         }
         movies.clear();
         movies.addAll(sortedMovies);

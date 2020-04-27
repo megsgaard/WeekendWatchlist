@@ -235,6 +235,9 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
         MenuItem searchItem = menu.findItem(R.id.app_bar_search);
         SearchView searchView = (SearchView) searchItem.getActionView();
 
+        MenuItem sortItem = menu.findItem(R.id.app_bar_sortByRating);
+        sortItem.setActionView(null);
+
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
