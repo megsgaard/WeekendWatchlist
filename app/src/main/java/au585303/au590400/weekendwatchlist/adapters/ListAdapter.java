@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import au585303.au590400.weekendwatchlist.R;
@@ -26,6 +27,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> im
     private OnItemLongClickListener onItemLongClickListener;
     private List<Movie> movies;
     private List<Movie> fullListOfMovies;
+    private boolean sortedByAscending = false;
 
     public ListAdapter(List<Movie> movies, OnItemClickListener onItemClickListener, OnItemLongClickListener onItemLongClickListener) {
         this.movies = movies;
@@ -39,11 +41,28 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> im
         notifyDataSetChanged();
     }
 
+    // Inspired by this: https://howtodoinjava.com/sort/collections-sort/
+    public void sortMoviesByRating() {
+        List<Movie> sortedMovies = new ArrayList<>();
+        if (!sortedByAscending) {
+            Collections.sort(movies);
+            sortedMovies.addAll(movies);
+            sortedByAscending = true;
+        } else {
+            Collections.sort(movies, Collections.reverseOrder());
+            sortedMovies.addAll(movies);
+        }
+        movies.clear();
+        movies.addAll(sortedMovies);
+        notifyDataSetChanged();
+    }
+
     @Override
     public Filter getFilter() {
         return movieFilter;
     }
 
+    // Search filter implementation inspired by this video: https://youtu.be/sJ-Z9G0SDhc
     private Filter movieFilter = new Filter() {
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {

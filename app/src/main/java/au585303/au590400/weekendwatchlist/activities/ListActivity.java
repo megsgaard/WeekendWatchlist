@@ -231,7 +231,7 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.search_menu, menu);
-        // Retrieve the SearchView and plug it into SearchManager
+
         MenuItem searchItem = menu.findItem(R.id.app_bar_search);
         SearchView searchView = (SearchView) searchItem.getActionView();
 
@@ -248,6 +248,12 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
             }
         });
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        adapter.sortMoviesByRating();
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

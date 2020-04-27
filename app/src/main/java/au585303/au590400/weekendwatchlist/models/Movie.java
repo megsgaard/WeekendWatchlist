@@ -1,6 +1,6 @@
 package au585303.au590400.weekendwatchlist.models;
 
-public class Movie {
+public class Movie implements Comparable<Movie> {
     private String title;
     private String year;
     private String genre;
@@ -139,5 +139,11 @@ public class Movie {
 
     public void setPersonalNotes(String personalNotes) {
         this.personalNotes = personalNotes;
+    }
+
+    // Inspired by this: https://howtodoinjava.com/sort/collections-sort/
+    @Override
+    public int compareTo(Movie o) {
+        return this.getImdbRating().compareTo(o.getImdbRating());
     }
 }
