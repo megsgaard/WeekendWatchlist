@@ -35,6 +35,7 @@ public class DetailsActivity extends AppCompatActivity {
     private static final String TAG = "DetailsActivity";
     private String movieTitleFromIntent;
     private Movie movie;
+    private View contentView;
 
     //Widgets
     TextView title;
@@ -51,6 +52,8 @@ public class DetailsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
+        contentView = findViewById(R.id.details_content);
+        contentView.setVisibility(View.GONE); // Hide the scroll view while loading
         initService();
 
         //Set widgets
@@ -88,7 +91,6 @@ public class DetailsActivity extends AppCompatActivity {
                 Movie movie = backgroundService.getMovie(movieTitleFromIntent);
                 Log.d(TAG, "onServiceConnected: Movie:" + movieTitleFromIntent);
                 //title.setText(movie.getTitle());
-
             }
 
             @Override
@@ -155,6 +157,8 @@ public class DetailsActivity extends AppCompatActivity {
             director.setText(movie.getDirector());
             writer.setText(movie.getWriter());
             Picasso.get().load(movie.getPoster()).into(poster);
+
+            contentView.setVisibility(View.VISIBLE); // Show scroll view once the movie is loaded.
         }
     };
 }
