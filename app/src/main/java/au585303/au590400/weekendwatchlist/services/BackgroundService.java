@@ -5,13 +5,15 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import java.util.List;
 
 import au585303.au590400.weekendwatchlist.models.Movie;
-import au585303.au590400.weekendwatchlist.models.MovieGsonObject;
+
+import static android.widget.Toast.LENGTH_LONG;
 
 public class BackgroundService extends Service {
     // Declare variables
@@ -27,6 +29,7 @@ public class BackgroundService extends Service {
 
     // Constructor
     public BackgroundService() {
+        Log.d(TAG, "BackgroundService: ");
         apiResponseListener = new APIHandler.IApiResponseListener() {
             @Override
             public void onMovieReady(Movie movie, String userEmail) {
@@ -40,6 +43,16 @@ public class BackgroundService extends Service {
                 Log.d(TAG, "onMovieReady: "+ movie.getTitle());
                 broadcastMovieReady();
                 fetchedMovie = movie;
+            }
+
+            @Override
+            public void onMovieShared() {
+                showMovieShared();
+            }
+
+            @Override
+            public void onMovieAdded() {
+                showMovieAdded();
             }
         };
 
@@ -75,6 +88,11 @@ public class BackgroundService extends Service {
         apiHandler.addRequest(searchWord, userEmail);
     }
 
+    public void shareMovie(Movie movie, String shareEmail) {
+        Log.d(TAG, "shareMovie: Trying to share movie: " + movie.getTitle() + "with user: " + shareEmail);
+        firestoreHandler.shareMovie(movie, shareEmail);
+    }
+
     public Movie getMovie(String movieId)
     {
         firestoreHandler.getMovie(movieId);
@@ -93,6 +111,14 @@ public class BackgroundService extends Service {
         Intent broadcastIntent = new Intent();
         broadcastIntent.setAction(BROADCAST_MOVIE_READY);
         LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
+    }
+
+    private void showMovieShared() {
+        Toast.makeText(this, "Movie has been shared!", LENGTH_LONG).show();
+    }
+
+    private void showMovieAdded() {
+        Toast.makeText(this, "Movie has been added to your list!", Toast.LENGTH_SHORT).show();
     }
 
     public void updateMovie() //TODO: Implement

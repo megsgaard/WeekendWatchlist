@@ -54,6 +54,8 @@ import static android.widget.Toast.LENGTH_LONG;
 public class ListActivity extends AppCompatActivity implements ListAdapter.OnItemClickListener, ListAdapter.OnItemLongClickListener  {
     private static final String TAG = "ListActivity";
     private static final int RC_SIGN_IN = 101;
+    public static final String USERS = "users";
+    public static final String MOVIES = "movies";
     private FirebaseFirestore fireStore = FirebaseFirestore.getInstance();
     private ServiceConnection serviceConnection;
     private BackgroundService backgroundService;
@@ -91,7 +93,7 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "onClick: Enter");
-                OpenAlertDialog();
+                openAlertDialog();
             }
         });
     }
@@ -154,7 +156,7 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
     }
 
     //Inspiration from: https://developer.android.com/guide/topics/ui/dialogs.html
-    private void OpenAlertDialog()
+    private void openAlertDialog()
     {
         final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(ListActivity.this);
         final LayoutInflater inflater = getLayoutInflater();
@@ -209,7 +211,7 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
     protected void onResume() {
         super.onResume();
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            fireStore.collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getEmail()).collection("movies").addSnapshotListener(this,
+            fireStore.collection(USERS).document(FirebaseAuth.getInstance().getCurrentUser().getEmail()).collection(MOVIES).addSnapshotListener(this,
                     new EventListener<QuerySnapshot>() {
                         @Override
                         public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
@@ -230,13 +232,10 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
     // Search menu inspired by this video: https://youtu.be/sJ-Z9G0SDhc
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.search_menu, menu);
+        getMenuInflater().inflate(R.menu.list_menu, menu);
 
         MenuItem searchItem = menu.findItem(R.id.app_bar_search);
         SearchView searchView = (SearchView) searchItem.getActionView();
-
-        MenuItem sortItem = menu.findItem(R.id.app_bar_sortByRating);
-        sortItem.setActionView(null);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override

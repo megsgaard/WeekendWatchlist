@@ -1,19 +1,27 @@
 package au585303.au590400.weekendwatchlist.activities;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.squareup.picasso.Picasso;
 
@@ -26,6 +34,7 @@ public class DetailsActivity extends AppCompatActivity {
     private BackgroundService backgroundService;
     private static final String TAG = "DetailsActivity";
     private String movieTitleFromIntent;
+    private Movie movie;
 
     //Widgets
     TextView title;
@@ -77,7 +86,7 @@ public class DetailsActivity extends AppCompatActivity {
 
                 //Set values of widgets accordning to intent
                 Movie movie = backgroundService.getMovie(movieTitleFromIntent);
-                Log.d(TAG, "onServiceConnected: Movie:"+movieTitleFromIntent);
+                Log.d(TAG, "onServiceConnected: Movie:" + movieTitleFromIntent);
                 //title.setText(movie.getTitle());
 
             }
@@ -89,19 +98,54 @@ public class DetailsActivity extends AppCompatActivity {
         };
     }
 
-    private void registerReciever()
-    {
+    private void registerReciever() {
         IntentFilter filter = new IntentFilter();
         filter.addAction(BackgroundService.BROADCAST_MOVIE_READY);
-        LocalBroadcastManager.getInstance(this).registerReceiver(onServiceMovieReady,filter);
+        LocalBroadcastManager.getInstance(this).registerReceiver(onServiceMovieReady, filter);
     }
 
-    private BroadcastReceiver onServiceMovieReady =new BroadcastReceiver() {
+    private void openShareDialog() {
+        final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        final LayoutInflater inflater = getLayoutInflater();
+        final View view = inflater.inflate(R.layout.share_dialog, null);
+        alertDialogBuilder.setTitle("Enter email of the user of you want to share movie with");
+        alertDialogBuilder.setView(view)
+                .setPositiveButton("Share movie", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        EditText txtEmail = view.findViewById(R.id.txtShareEmail);
+                        String shareEmail = txtEmail.getText().toString();
+                        backgroundService.shareMovie(movie, shareEmail);
+                    }
+                })
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+        alertDialogBuilder.show();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.details_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        // Since there's only one icon in the menu at this point, it's not necessary to check the item id.
+        openShareDialog();
+        return super.onOptionsItemSelected(item);
+    }
+
+    private BroadcastReceiver onServiceMovieReady = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Movie movie = backgroundService.getReadyMovie();
+            movie = backgroundService.getReadyMovie();
 
-            //Set widgets accordning to movie
+            //Set widgets according to movie
             title.setText(movie.getTitle());
             year.setText(movie.getYear());
             imdbRating.setText(movie.getImdbRating());

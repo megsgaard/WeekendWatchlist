@@ -9,10 +9,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import au585303.au590400.weekendwatchlist.models.Movie;
 
@@ -41,7 +39,7 @@ class FirestoreHandler {
             @Override
             public void onSuccess(Void aVoid) {
                 Log.d(TAG, "onSuccess: Document has been saved!");
-                // Could show a toast here or something else, but the list should automatically update so might be redundant.
+                listener.onMovieAdded();
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -49,8 +47,22 @@ class FirestoreHandler {
                 Log.w(TAG, "onFailure: Document was not saved!", e);
             }
         });
+    }
 
-        //Log.d(TAG, "addMovie: "+firebaseUser.getEmail() + "vs " +userEmail);
+    void shareMovie(Movie movie, String shareEmail) {
+        String movieId = movie.getTitle().toLowerCase();
+        db.collection(USERS).document(shareEmail).collection(MOVIES).document(movieId).set(movie).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.d(TAG, "onSuccess: Movie has been shared");
+                listener.onMovieShared();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d(TAG, "onFailure: Could not share movie");
+            }
+        });
     }
 
     //https://firebase.google.com/docs/firestore/query-data/get-data#java
@@ -99,5 +111,7 @@ class FirestoreHandler {
     // Listener interface
     public interface IMovieResponseListener {
         void onMovieReady(Movie movie);
+        void onMovieShared();
+        void onMovieAdded();
     }
 }
