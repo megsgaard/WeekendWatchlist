@@ -51,7 +51,7 @@ import au585303.au590400.weekendwatchlist.services.BackgroundService;
 
 import static android.widget.Toast.LENGTH_LONG;
 
-public class ListActivity extends AppCompatActivity implements ListAdapter.OnItemClickListener, ListAdapter.OnItemLongClickListener  {
+public class ListActivity extends AppCompatActivity implements ListAdapter.OnItemClickListener, ListAdapter.OnItemLongClickListener {
     private static final String TAG = "ListActivity";
     private static final int RC_SIGN_IN = 101;
     public static final String USERS = "users";
@@ -85,7 +85,7 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
         buttonAdd = findViewById(R.id.fabAdd);
 
         //Set up adapter and recyclerview
-        adapter = new ListAdapter(movies, this,this);
+        adapter = new ListAdapter(movies, this, this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
@@ -109,7 +109,9 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 backgroundService = ((BackgroundService.LocalBinder) service).getService();
-//                backgroundService.addMovie(); this will crash if the user isn't logged in. tested that it works. commented out to not break on first startup
+                if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+                    backgroundService.setUserEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
+                }
             }
 
             @Override
@@ -156,19 +158,17 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
     }
 
     //Inspiration from: https://developer.android.com/guide/topics/ui/dialogs.html
-    private void openAlertDialog()
-    {
+    private void openAlertDialog() {
         final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(ListActivity.this);
         final LayoutInflater inflater = getLayoutInflater();
-        final View view = inflater.inflate(R.layout.search_dialog,null);
+        final View view = inflater.inflate(R.layout.search_dialog, null);
         alertDialogBuilder.setTitle(R.string.dialog_text);
         alertDialogBuilder.setView(view)
                 .setPositiveButton(R.string.add_movie, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         EditText searchWord = view.findViewById(R.id.txtSearchWord);
-                        String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
-                        backgroundService.addMovie(searchWord.getText().toString(), userEmail); //TODO: FHJ: Tror ikke emailen er nødvendig
+                        backgroundService.addMovie(searchWord.getText().toString());
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -178,8 +178,7 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
                     }
                 });
 
-                alertDialogBuilder.show();
-        //backgroundService.addMovie("Joker");
+        alertDialogBuilder.show();
     }
 
 
@@ -194,15 +193,11 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
                 // Successfully signed in
                 // Change appbar title to username
                 setActionBar();
+                backgroundService.setUserEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
             } else {
                 Log.d(TAG, "Login was aborted");
                 launchSignIn();
                 Toast.makeText(this, "You must login or sign up to use the app", LENGTH_LONG).show();
-
-                // Sign in failed. If response is null the user canceled the
-                // sign-in flow using the back button. Otherwise check
-                // response.getError().getErrorCode() and handle the error.
-                // ...
             }
         }
     }
@@ -217,7 +212,8 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
                         @Override
                         public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
                             if (queryDocumentSnapshots != null && !queryDocumentSnapshots.getDocuments().isEmpty()) {
-                                /*List<Movie>*/ movies = new ArrayList<>();
+                                /*List<Movie>*/
+                                movies = new ArrayList<>();
                                 for (DocumentSnapshot snapshot : queryDocumentSnapshots.getDocuments()) {
                                     Movie movie = snapshot.toObject(Movie.class);
                                     movies.add(movie);
@@ -279,12 +275,12 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
         //Create AlertDialog to make safe delete
         final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(ListActivity.this);
         alertDialogBuilder.setMessage(R.string.delete_question)
-        .setPositiveButton(R.string.delete_yes, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                backgroundService.deleteMovie(movie.getTitle());
-            }
-        }).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.delete_yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        backgroundService.deleteMovie(movie.getTitle());
+                    }
+                }).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();

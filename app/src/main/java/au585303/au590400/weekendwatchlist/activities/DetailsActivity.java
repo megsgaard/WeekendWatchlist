@@ -90,9 +90,8 @@ public class DetailsActivity extends AppCompatActivity {
                 backgroundService = ((BackgroundService.LocalBinder) service).getService();
 
                 //Set values of widgets accordning to intent
-                Movie movie = backgroundService.getMovie(movieTitleFromIntent);
+                backgroundService.getMovie(movieTitleFromIntent);
                 Log.d(TAG, "onServiceConnected: Movie:" + movieTitleFromIntent);
-                //title.setText(movie.getTitle());
             }
 
             @Override
@@ -124,7 +123,9 @@ public class DetailsActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         EditText txtEmail = view.findViewById(R.id.txtShareEmail);
                         String shareEmail = txtEmail.getText().toString();
-                        backgroundService.shareMovie(movie, shareEmail);
+                        if (!shareEmail.isEmpty()) {
+                            backgroundService.shareMovie(movie, shareEmail);
+                        }
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {

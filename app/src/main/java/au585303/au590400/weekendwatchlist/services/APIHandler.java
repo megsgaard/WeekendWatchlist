@@ -33,7 +33,7 @@ public class APIHandler {
     }
 
     // AddRequest to queue method
-    public void addRequest(final String searchWord, final String userEmail) {
+    public void addRequest(final String searchWord) {
         Log.d(TAG, "addRequest Enter");
         if (requestQueue == null) {
             Log.d(TAG, "myRequestQueue was null");
@@ -51,7 +51,7 @@ public class APIHandler {
                     Movie movie = parseJsonWithGson(response.toString());
                     if (movie != null) {
                         movieToBeAdded = movie;
-                        listener.onMovieReady(movieToBeAdded, userEmail);
+                        listener.onMovieReady(movieToBeAdded);
                         Log.d(TAG, "movie from parsing Json:" + movie.getTitle());
 
                     } else {
@@ -102,7 +102,7 @@ public class APIHandler {
 
     // Listener interface
     public interface IApiResponseListener {
-        void onMovieReady(Movie movie, String userEmail);
+        void onMovieReady(Movie movie);
     }
 
 }

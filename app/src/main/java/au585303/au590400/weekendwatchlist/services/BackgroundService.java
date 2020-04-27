@@ -32,9 +32,9 @@ public class BackgroundService extends Service {
         Log.d(TAG, "BackgroundService: ");
         apiResponseListener = new APIHandler.IApiResponseListener() {
             @Override
-            public void onMovieReady(Movie movie, String userEmail) {
+            public void onMovieReady(Movie movie) {
                 Log.d(TAG, "onMovieReady Enter: adding movie to Firestore");
-                firestoreHandler.addMovie(movie/*, userEmail*/);
+                firestoreHandler.addMovie(movie);
             }
         };
         movieResponseListener = new FirestoreHandler.IMovieResponseListener() {
@@ -82,10 +82,10 @@ public class BackgroundService extends Service {
         return null;
     }
 
-    public void addMovie(String searchWord, String userEmail) //TODO: Implement
+    public void addMovie(String searchWord) //TODO: Implement
     {
         Log.d(TAG, "addMovie: " + searchWord);
-        apiHandler.addRequest(searchWord, userEmail);
+        apiHandler.addRequest(searchWord);
     }
 
     public void shareMovie(Movie movie, String shareEmail) {
@@ -93,16 +93,29 @@ public class BackgroundService extends Service {
         firestoreHandler.shareMovie(movie, shareEmail);
     }
 
-    public Movie getMovie(String movieId)
+    public void getMovie(String movieId)
     {
         firestoreHandler.getMovie(movieId);
         Log.d(TAG, "getMovie: called");
-        return null;
     }
 
     public Movie getReadyMovie()
     {
         return fetchedMovie;
+    }
+
+    public void updateMovie() //TODO: Implement
+    {
+
+    }
+
+    public void deleteMovie(String movie) //TODO: Implement
+    {
+        firestoreHandler.deleteMovie(movie);
+    }
+
+    public void setUserEmail(String userEmail) {
+        firestoreHandler.setUserEmail(userEmail);
     }
 
     private void broadcastMovieReady()
@@ -119,15 +132,5 @@ public class BackgroundService extends Service {
 
     private void showMovieAdded() {
         Toast.makeText(this, "Movie has been added to your list!", Toast.LENGTH_SHORT).show();
-    }
-
-    public void updateMovie() //TODO: Implement
-    {
-
-    }
-
-    public void deleteMovie(String movie) //TODO: Implement
-    {
-        firestoreHandler.deleteMovie(movie);
     }
 }
