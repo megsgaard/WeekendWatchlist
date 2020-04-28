@@ -62,7 +62,7 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
     private FirebaseFirestore fireStore = FirebaseFirestore.getInstance();
     private ServiceConnection serviceConnection;
     private BackgroundService backgroundService;
-    private List<Movie> movies = new ArrayList<>();
+    private ArrayList<Movie> movies;
     private int selectedGenre;
 
     //widgets
@@ -84,6 +84,30 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
             setActionBar();
         }
 
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            fireStore.collection(USERS).document(FirebaseAuth.getInstance().getCurrentUser().getEmail()).collection(MOVIES).addSnapshotListener(this,
+                    new EventListener<QuerySnapshot>() {
+                        @Override
+                        public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                            if (queryDocumentSnapshots != null && !queryDocumentSnapshots.getDocuments().isEmpty()) {
+                                for (DocumentSnapshot snapshot : queryDocumentSnapshots.getDocuments()) {
+                                    Movie movie = snapshot.toObject(Movie.class);
+                                    movies.add(movie);
+                                }
+                                adapter.setMovies(movies);
+                            }
+                        }
+                    }
+            );
+        }
+
+        if (savedInstanceState != null) {
+            // Doing this to save recycler view position on rotation
+            movies = savedInstanceState.getParcelableArrayList(MOVIES);
+        } else {
+            movies = new ArrayList<>();
+        }
+
         //Set widgets
         recyclerView = findViewById(R.id.recyclerView);
         buttonAdd = findViewById(R.id.fabAdd);
@@ -100,6 +124,12 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
                 openAddMovieDialog();
             }
         });
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList(MOVIES, movies);
     }
 
     private void initService() {
@@ -191,7 +221,7 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
         final View view = inflater.inflate(R.layout.filter_dialog, null);
 
         // https://developer.android.com/guide/topics/ui/controls/spinner
-        Spinner spinner = view.findViewById(R.id.genre_spinner);
+        final Spinner spinner = view.findViewById(R.id.genre_spinner);
         ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(this, R.array.genres_array, android.R.layout.simple_spinner_item);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(spinnerAdapter);
@@ -215,6 +245,13 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
+                    }
+                })
+                .setNeutralButton("Clear filter", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        selectedGenre = 0;
+                        adapter.getGenreFilter().filter("All");
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -251,24 +288,7 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
     @Override
     protected void onResume() {
         super.onResume();
-        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            fireStore.collection(USERS).document(FirebaseAuth.getInstance().getCurrentUser().getEmail()).collection(MOVIES).addSnapshotListener(this,
-                    new EventListener<QuerySnapshot>() {
-                        @Override
-                        public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                            if (queryDocumentSnapshots != null && !queryDocumentSnapshots.getDocuments().isEmpty()) {
-                                /*List<Movie>*/
-                                movies = new ArrayList<>();
-                                for (DocumentSnapshot snapshot : queryDocumentSnapshots.getDocuments()) {
-                                    Movie movie = snapshot.toObject(Movie.class);
-                                    movies.add(movie);
-                                }
-                                adapter.setMovies(movies);
-                            }
-                        }
-                    }
-            );
-        }
+
     }
 
     // Search menu inspired by this video: https://youtu.be/sJ-Z9G0SDhc

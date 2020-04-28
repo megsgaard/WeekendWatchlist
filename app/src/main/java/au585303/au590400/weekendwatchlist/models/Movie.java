@@ -1,6 +1,9 @@
 package au585303.au590400.weekendwatchlist.models;
 
-public class Movie implements Comparable<Movie> {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class Movie implements Comparable<Movie>, Parcelable {
     private String title;
     private String year;
     private String genre;
@@ -34,6 +37,34 @@ public class Movie implements Comparable<Movie> {
     public Movie() {
     }
 
+
+    protected Movie(Parcel in) {
+        title = in.readString();
+        year = in.readString();
+        genre = in.readString();
+        runtime = in.readString();
+        director = in.readString();
+        writer = in.readString();
+        actors = in.readString();
+        plot = in.readString();
+        awards = in.readString();
+        poster = in.readString();
+        imdbRating = in.readString();
+        personalRating = in.readString();
+        personalNotes = in.readString();
+    }
+
+    public static final Creator<Movie> CREATOR = new Creator<Movie>() {
+        @Override
+        public Movie createFromParcel(Parcel in) {
+            return new Movie(in);
+        }
+
+        @Override
+        public Movie[] newArray(int size) {
+            return new Movie[size];
+        }
+    };
 
     //Getter and Setter methods
     public String getRuntime() {
@@ -145,5 +176,27 @@ public class Movie implements Comparable<Movie> {
     @Override
     public int compareTo(Movie o) {
         return this.getImdbRating().compareTo(o.getImdbRating());
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(title);
+        dest.writeString(year);
+        dest.writeString(genre);
+        dest.writeString(runtime);
+        dest.writeString(director);
+        dest.writeString(writer);
+        dest.writeString(actors);
+        dest.writeString(plot);
+        dest.writeString(awards);
+        dest.writeString(poster);
+        dest.writeString(imdbRating);
+        dest.writeString(personalRating);
+        dest.writeString(personalNotes);
     }
 }
