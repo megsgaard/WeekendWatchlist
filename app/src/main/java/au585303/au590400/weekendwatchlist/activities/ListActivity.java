@@ -74,15 +74,7 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
         Log.d(TAG, "onCreate called");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
-
-        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            // If user is not logged in
-            launchSignIn();
-        } else {
-            setActionBar();
-        }
-
-        initService();
+        checkUserStatus();
 
         if (savedInstanceState != null) {
             // Doing this to save recycler view position on rotation
@@ -94,27 +86,14 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
             selectedGenre = "All";
         }
 
-        //Set widgets
-        RecyclerView recyclerView = findViewById(R.id.recyclerView);
-        FloatingActionButton buttonAdd = findViewById(R.id.fabAdd);
-
-        //Set up adapter and recyclerview
-        adapter = new ListAdapter(movies, this, this);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(adapter);
-
-        buttonAdd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG, "onClick: Enter");
-                openAddMovieDialog();
-            }
-        });
+        initViews();
+        initService();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        // TODO: MEG: I guess this logic should be moved to FirestoreHandler instead.
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             fireStore.collection(USERS).document(FirebaseAuth.getInstance().getCurrentUser().getEmail()).collection(MOVIES).addSnapshotListener(this,
                     new EventListener<QuerySnapshot>() {
@@ -144,6 +123,52 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
         outState.putInt(SELECTED_GENRE_POSITION, selectedGenrePosition);
     }
 
+    private void checkUserStatus() {
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            // If user is not logged in
+            launchSignIn();
+        } else {
+            setActionBar();
+        }
+    }
+
+    private void launchSignIn() {
+        // Choose authentication providers
+        List<AuthUI.IdpConfig> providers = Arrays.asList(
+                new AuthUI.IdpConfig.EmailBuilder().build());
+        // Create and launch sign-in intent
+        startActivityForResult(
+                AuthUI.getInstance()
+                        .createSignInIntentBuilder()
+                        .setAvailableProviders(providers)
+                        .build(),
+                RC_SIGN_IN);
+    }
+
+    private void setActionBar() {
+        String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+        getSupportActionBar().setTitle(userEmail);
+    }
+
+    private void initViews() {
+        //Set widgets
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+        FloatingActionButton buttonAdd = findViewById(R.id.fabAdd);
+
+        //Set up adapter and recyclerview
+        adapter = new ListAdapter(movies, this, this);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(adapter);
+
+        buttonAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "onClick: Enter");
+                openAddMovieDialog();
+            }
+        });
+    }
+
     private void initService() {
         Log.d(TAG, "initService: setting up connection, starting and binding to service");
         setupServiceConnection();
@@ -165,24 +190,6 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
                 backgroundService = null;
             }
         };
-    }
-
-    private void launchSignIn() {
-        // Choose authentication providers
-        List<AuthUI.IdpConfig> providers = Arrays.asList(
-                new AuthUI.IdpConfig.EmailBuilder().build());
-        // Create and launch sign-in intent
-        startActivityForResult(
-                AuthUI.getInstance()
-                        .createSignInIntentBuilder()
-                        .setAvailableProviders(providers)
-                        .build(),
-                RC_SIGN_IN);
-    }
-
-    private void setActionBar() {
-        String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
-        getSupportActionBar().setTitle(userEmail);
     }
 
     //Inspiration from: https://developer.android.com/guide/topics/ui/dialogs.html
@@ -262,12 +269,8 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RC_SIGN_IN) {
-            IdpResponse response = IdpResponse.fromResultIntent(data);
-            Log.d(TAG, "RequestCode correct");
             if (resultCode == RESULT_OK) {
-                Log.d(TAG, "Result code OK");
-                // Successfully signed in
-                // Change appbar title to username
+                Log.d(TAG, "onActivityResult: Login was successfull");
                 setActionBar();
                 backgroundService.setUserEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
             } else {
