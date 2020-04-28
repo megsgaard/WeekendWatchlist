@@ -26,7 +26,6 @@ public class BackgroundService extends Service {
     private FirestoreHandler.IMovieResponseListener movieResponseListener;
     private Movie fetchedMovie;
 
-
     // Constructor
     public BackgroundService() {
         Log.d(TAG, "BackgroundService: ");

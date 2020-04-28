@@ -77,6 +77,12 @@ public class DetailsActivity extends AppCompatActivity {
         registerReciever();
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unbindService(serviceConnection);
+    }
+
     private void initService() {
         Log.d(TAG, "initService: setting up connection, starting and binding to service");
         setupServiceConnection();
@@ -88,10 +94,10 @@ public class DetailsActivity extends AppCompatActivity {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 backgroundService = ((BackgroundService.LocalBinder) service).getService();
+                Log.d(TAG, "onServiceConnected: Movie:" + movieTitleFromIntent);
 
                 //Set values of widgets accordning to intent
                 backgroundService.getMovie(movieTitleFromIntent);
-                Log.d(TAG, "onServiceConnected: Movie:" + movieTitleFromIntent);
             }
 
             @Override

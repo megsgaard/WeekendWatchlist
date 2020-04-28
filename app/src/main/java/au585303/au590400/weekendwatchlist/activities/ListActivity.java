@@ -59,22 +59,20 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
     private static final int RC_SIGN_IN = 101;
     public static final String USERS = "users";
     public static final String MOVIES = "movies";
+    public static final String SELECTED_GENRE = "SelectedGenre";
+    public static final String SELECTED_GENRE_POSITION = "selectedGenrePosition";
     private FirebaseFirestore fireStore = FirebaseFirestore.getInstance();
     private ServiceConnection serviceConnection;
     private BackgroundService backgroundService;
     private ArrayList<Movie> movies;
-    private int selectedGenre;
-
-    //widgets
-    private RecyclerView recyclerView;
+    private int selectedGenrePosition;
+    private String selectedGenre;
     private ListAdapter adapter;
-    private FloatingActionButton buttonAdd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate called");
         super.onCreate(savedInstanceState);
-        initService();
         setContentView(R.layout.activity_list);
 
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
@@ -84,33 +82,21 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
             setActionBar();
         }
 
-        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            fireStore.collection(USERS).document(FirebaseAuth.getInstance().getCurrentUser().getEmail()).collection(MOVIES).addSnapshotListener(this,
-                    new EventListener<QuerySnapshot>() {
-                        @Override
-                        public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                            if (queryDocumentSnapshots != null && !queryDocumentSnapshots.getDocuments().isEmpty()) {
-                                for (DocumentSnapshot snapshot : queryDocumentSnapshots.getDocuments()) {
-                                    Movie movie = snapshot.toObject(Movie.class);
-                                    movies.add(movie);
-                                }
-                                adapter.setMovies(movies);
-                            }
-                        }
-                    }
-            );
-        }
+        initService();
 
         if (savedInstanceState != null) {
             // Doing this to save recycler view position on rotation
             movies = savedInstanceState.getParcelableArrayList(MOVIES);
+            selectedGenre = savedInstanceState.getString(SELECTED_GENRE);
+            selectedGenrePosition = savedInstanceState.getInt(SELECTED_GENRE_POSITION);
         } else {
             movies = new ArrayList<>();
+            selectedGenre = "All";
         }
 
         //Set widgets
-        recyclerView = findViewById(R.id.recyclerView);
-        buttonAdd = findViewById(R.id.fabAdd);
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+        FloatingActionButton buttonAdd = findViewById(R.id.fabAdd);
 
         //Set up adapter and recyclerview
         adapter = new ListAdapter(movies, this, this);
@@ -127,9 +113,35 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            fireStore.collection(USERS).document(FirebaseAuth.getInstance().getCurrentUser().getEmail()).collection(MOVIES).addSnapshotListener(this,
+                    new EventListener<QuerySnapshot>() {
+                        @Override
+                        public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                            if (queryDocumentSnapshots != null && !queryDocumentSnapshots.getDocuments().isEmpty()) {
+                                for (DocumentSnapshot snapshot : queryDocumentSnapshots.getDocuments()) {
+                                    Movie movie = snapshot.toObject(Movie.class);
+                                    if (!movies.contains(movie)) {
+                                        movies.add(movie);
+                                    }
+                                }
+                                adapter.setMovies(movies);
+                                adapter.getGenreFilter().filter(selectedGenre);
+                            }
+                        }
+                    }
+            );
+        }
+    }
+
+    @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList(MOVIES, movies);
+        outState.putString(SELECTED_GENRE, selectedGenre);
+        outState.putInt(SELECTED_GENRE_POSITION, selectedGenrePosition);
     }
 
     private void initService() {
@@ -153,24 +165,6 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
                 backgroundService = null;
             }
         };
-    }
-
-    private void testCode() {
-        //Kode direkte kopieret fra hans demo
-        Map<String, Object> item = new HashMap<>();
-        item.put("text", new Date().toString());
-
-        Task<DocumentReference> items = fireStore.collection("Items").add(item).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-            @Override
-            public void onSuccess(DocumentReference documentReference) {
-                Log.d(TAG, "Added " + documentReference.getId());
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.d(TAG, e.getMessage());
-            }
-        });
     }
 
     private void launchSignIn() {
@@ -225,13 +219,13 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
         ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(this, R.array.genres_array, android.R.layout.simple_spinner_item);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(spinnerAdapter);
-        spinner.setSelection(selectedGenre);
+        spinner.setSelection(selectedGenrePosition);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedGenre = position;
-                String genre = parent.getItemAtPosition(position).toString();
-                adapter.getGenreFilter().filter(genre);
+                selectedGenrePosition = position;
+                selectedGenre = parent.getItemAtPosition(position).toString();
+                adapter.getGenreFilter().filter(selectedGenre);
             }
 
             @Override
@@ -250,7 +244,8 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
                 .setNeutralButton("Clear filter", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        selectedGenre = 0;
+                        selectedGenrePosition = 0;
+                        selectedGenre = "All";
                         adapter.getGenreFilter().filter("All");
                     }
                 })
@@ -260,7 +255,6 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
                         dialog.cancel();
                     }
                 });
-
         alertDialogBuilder.show();
     }
 
@@ -282,13 +276,6 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
                 Toast.makeText(this, "You must login or sign up to use the app", LENGTH_LONG).show();
             }
         }
-    }
-
-    // TODO: MEG: Maybe this should be moved to onStart() instead?
-    @Override
-    protected void onResume() {
-        super.onResume();
-
     }
 
     // Search menu inspired by this video: https://youtu.be/sJ-Z9G0SDhc
@@ -344,6 +331,7 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         backgroundService.deleteMovie(movie.getTitle());
+                        movies.remove(movie);
                     }
                 }).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
@@ -351,7 +339,6 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
                 dialog.cancel();
             }
         });
-
         alertDialogBuilder.show();
     }
 }

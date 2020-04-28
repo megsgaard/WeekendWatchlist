@@ -3,6 +3,8 @@ package au585303.au590400.weekendwatchlist.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.Nullable;
+
 public class Movie implements Comparable<Movie>, Parcelable {
     private String title;
     private String year;
@@ -170,6 +172,13 @@ public class Movie implements Comparable<Movie>, Parcelable {
 
     public void setPersonalNotes(String personalNotes) {
         this.personalNotes = personalNotes;
+    }
+
+    // Overriding this in order for if (!movies.contains(movie)) to work inside the snapshot listener in ListActivity.
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        Movie movie = (Movie) obj;
+        return movie.getTitle().equals(title);
     }
 
     // Inspired by this: https://howtodoinjava.com/sort/collections-sort/

@@ -4,7 +4,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
-import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -21,8 +20,8 @@ import au585303.au590400.weekendwatchlist.R;
 import au585303.au590400.weekendwatchlist.models.Movie;
 
 public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
-    // Defining variables
     private static final String LOG = "ListAdapter";
+    private static final String ALL = "All";
     private OnItemClickListener onItemClickListener;
     private OnItemLongClickListener onItemLongClickListener;
     private List<Movie> movies;
@@ -40,7 +39,6 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         this.movies = movies;
         fullListOfMovies = new ArrayList<>(movies);
         moviesFilteredByGenre = new ArrayList<>(movies);
-        notifyDataSetChanged();
     }
 
     // Inspired by this: https://howtodoinjava.com/sort/collections-sort/
@@ -70,11 +68,12 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         return genreFilter;
     }
 
+    // Filter implementation inspired by this video: https://youtu.be/sJ-Z9G0SDhc
     private Filter genreFilter = new Filter() {
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
             List<Movie> filterList = new ArrayList<>();
-            if (constraint.equals("All")) {
+            if (constraint.equals(ALL)) {
                 filterList.addAll(fullListOfMovies);
             } else {
                 String filterPattern = constraint.toString().toLowerCase().trim();
