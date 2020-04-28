@@ -12,7 +12,10 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -60,6 +63,7 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
     private ServiceConnection serviceConnection;
     private BackgroundService backgroundService;
     private List<Movie> movies = new ArrayList<>();
+    private int selectedGenre;
 
     //widgets
     private RecyclerView recyclerView;
@@ -93,7 +97,7 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "onClick: Enter");
-                openAlertDialog();
+                openAddMovieDialog();
             }
         });
     }
@@ -158,7 +162,7 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
     }
 
     //Inspiration from: https://developer.android.com/guide/topics/ui/dialogs.html
-    private void openAlertDialog() {
+    private void openAddMovieDialog() {
         final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(ListActivity.this);
         final LayoutInflater inflater = getLayoutInflater();
         final View view = inflater.inflate(R.layout.search_dialog, null);
@@ -181,6 +185,47 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
         alertDialogBuilder.show();
     }
 
+    private void openFilterMoviesDialog() {
+        final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(ListActivity.this);
+        final LayoutInflater inflater = getLayoutInflater();
+        final View view = inflater.inflate(R.layout.filter_dialog, null);
+
+        // https://developer.android.com/guide/topics/ui/controls/spinner
+        Spinner spinner = view.findViewById(R.id.genre_spinner);
+        ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(this, R.array.genres_array, android.R.layout.simple_spinner_item);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(spinnerAdapter);
+        spinner.setSelection(selectedGenre);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selectedGenre = position;
+                String genre = parent.getItemAtPosition(position).toString();
+                adapter.getGenreFilter().filter(genre);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        alertDialogBuilder.setTitle("Filter movies by selecting genre");
+        alertDialogBuilder.setView(view)
+                .setPositiveButton("Filter", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+        alertDialogBuilder.show();
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -242,7 +287,7 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                adapter.getFilter().filter(newText);
+                adapter.getSearchFilter().filter(newText);
                 return false;
             }
         });
@@ -255,7 +300,7 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
             adapter.sortMoviesByRating();
         }
         if (item.getItemId() == R.id.app_bar_filterByCategory) {
-            //implement adapter.filterByCategory();
+            openFilterMoviesDialog();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -288,6 +333,5 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
         });
 
         alertDialogBuilder.show();
-        //backgroundService.deleteMovie(movie.getTitle());
     }
 }

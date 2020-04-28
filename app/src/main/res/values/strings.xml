@@ -12,6 +12,36 @@
     <string name="writer_text">Writer</string>
     <string name="delete_question">Do you want to delete this movie from the list?</string>
     <string name="delete_yes">Yes, delete</string>
+    <string-array name="genres_array">
+        <item>All</item>
+        <item>Action</item>
+        <item>Adventure</item>
+        <item>Animation</item>
+        <item>Biography</item>
+        <item>Comedy</item>
+        <item>Crime</item>
+        <item>Documentary</item>
+        <item>Drama</item>
+        <item>Family</item>
+        <item>Fantasy</item>
+        <item>Film Noir</item>
+        <item>Game-Show</item>
+        <item>History</item>
+        <item>Horror</item>
+        <item>Musical</item>
+        <item>Music</item>
+        <item>Mystery</item>
+        <item>News</item>
+        <item>Reality-TV</item>
+        <item>Romance</item>
+        <item>Sci-Fi</item>
+        <item>Short</item>
+        <item>Sport</item>
+        <item>Talk-Show</item>
+        <item>Thriller</item>
+        <item>War</item>
+        <item>Western</item>
+    </string-array>
 
 
 </resources>

@@ -20,13 +20,14 @@ import java.util.List;
 import au585303.au590400.weekendwatchlist.R;
 import au585303.au590400.weekendwatchlist.models.Movie;
 
-public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> implements Filterable {
+public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     // Defining variables
     private static final String LOG = "ListAdapter";
     private OnItemClickListener onItemClickListener;
     private OnItemLongClickListener onItemLongClickListener;
     private List<Movie> movies;
     private List<Movie> fullListOfMovies;
+    private List<Movie> moviesFilteredByGenre;
     private boolean sortedByDescending = false;
 
     public ListAdapter(List<Movie> movies, OnItemClickListener onItemClickListener, OnItemLongClickListener onItemLongClickListener) {
@@ -38,6 +39,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> im
     public void setMovies(List<Movie> movies) {
         this.movies = movies;
         fullListOfMovies = new ArrayList<>(movies);
+        moviesFilteredByGenre = new ArrayList<>(movies);
         notifyDataSetChanged();
     }
 
@@ -46,10 +48,12 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> im
         List<Movie> sortedMovies = new ArrayList<>();
         if (!sortedByDescending) {
             Collections.sort(movies, Collections.reverseOrder());
+            Collections.sort(fullListOfMovies, Collections.reverseOrder());
             sortedMovies.addAll(movies);
             sortedByDescending = true;
         } else {
             Collections.sort(movies);
+            Collections.sort(fullListOfMovies);
             sortedMovies.addAll(movies);
             sortedByDescending = false;
         }
@@ -58,21 +62,52 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> im
         notifyDataSetChanged();
     }
 
-    @Override
-    public Filter getFilter() {
-        return movieFilter;
+    public Filter getSearchFilter() {
+        return searchFilter;
     }
 
-    // Search filter implementation inspired by this video: https://youtu.be/sJ-Z9G0SDhc
-    private Filter movieFilter = new Filter() {
+    public Filter getGenreFilter() {
+        return genreFilter;
+    }
+
+    private Filter genreFilter = new Filter() {
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
             List<Movie> filterList = new ArrayList<>();
-            if (constraint == null || constraint.length() == 0) {
+            if (constraint.equals("All")) {
                 filterList.addAll(fullListOfMovies);
             } else {
                 String filterPattern = constraint.toString().toLowerCase().trim();
                 for (Movie movie : fullListOfMovies) {
+                    if (movie.getGenre().toLowerCase().contains(filterPattern)) {
+                        filterList.add(movie);
+                    }
+                }
+            }
+            moviesFilteredByGenre = filterList;
+            FilterResults results = new FilterResults();
+            results.values = filterList;
+            return results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            movies.clear();
+            movies.addAll((List) results.values);
+            notifyDataSetChanged();
+        }
+    };
+
+    // Search filter implementation inspired by this video: https://youtu.be/sJ-Z9G0SDhc
+    private Filter searchFilter = new Filter() {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            List<Movie> filterList = new ArrayList<>();
+            if (constraint == null || constraint.length() == 0) {
+                filterList.addAll(moviesFilteredByGenre);
+            } else {
+                String filterPattern = constraint.toString().toLowerCase().trim();
+                for (Movie movie : moviesFilteredByGenre) {
                     if (movie.getTitle().toLowerCase().contains(filterPattern)) {
                         filterList.add(movie);
                     }
@@ -80,13 +115,13 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> im
             }
             FilterResults results = new FilterResults();
             results.values = filterList;
-            return  results;
+            return results;
         }
 
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
             movies.clear();
-            movies.addAll((List)results.values);
+            movies.addAll((List) results.values);
             notifyDataSetChanged();
         }
     };
@@ -118,8 +153,10 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> im
         public void onClick(View view) {
             onItemClickListener.onItemClick(getAdapterPosition());
         }
+
         @Override
-        public boolean onLongClick(View view){ onItemLongClickListener.onItemLongClick(getAdapterPosition());
+        public boolean onLongClick(View view) {
+            onItemLongClickListener.onItemLongClick(getAdapterPosition());
             return false;
         }
     }
@@ -153,7 +190,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> im
         void onItemClick(int position);
     }
 
-    public interface OnItemLongClickListener{
+    public interface OnItemLongClickListener {
         void onItemLongClick(int position);
     }
 }

@@ -109,9 +109,10 @@ public class BackgroundService extends Service {
 
     }
 
-    public void deleteMovie(String movie) //TODO: Implement
+    public void deleteMovie(String movieId) //TODO: Implement
     {
-        firestoreHandler.deleteMovie(movie);
+        Log.d(TAG, "deleteMovie: with title: " + movieId);
+        firestoreHandler.deleteMovie(movieId);
     }
 
     public void setUserEmail(String userEmail) {
