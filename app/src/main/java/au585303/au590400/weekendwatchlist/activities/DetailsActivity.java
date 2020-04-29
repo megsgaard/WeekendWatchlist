@@ -14,8 +14,10 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -48,6 +50,8 @@ public class DetailsActivity extends AppCompatActivity {
     TextView director;
     TextView writer;
     ImageView poster;
+    RatingBar ratingBar;
+    EditText personalNotes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,8 +77,30 @@ public class DetailsActivity extends AppCompatActivity {
         Intent intent = getIntent();
         movieTitleFromIntent = intent.getStringExtra(getResources().getString(R.string.intent_extra_movietitle));
 
-        //Register broadcast reciever
+        //Register broadcast receiver
         registerReciever();
+
+        Button btnCancel = findViewById(R.id.btnCancel);
+        btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
+        ratingBar = findViewById(R.id.ratingBar);
+        personalNotes = findViewById(R.id.txtPersonalNotes);
+
+        Button btnUpdate = findViewById(R.id.btnUpdate);
+        btnUpdate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                movie.setPersonalRating(Float.toString(ratingBar.getRating()));
+                movie.setPersonalNotes(personalNotes.getText().toString());
+                backgroundService.updateMovie(movie);
+                finish();
+            }
+        });
     }
 
     @Override
@@ -96,7 +122,7 @@ public class DetailsActivity extends AppCompatActivity {
                 backgroundService = ((BackgroundService.LocalBinder) service).getService();
                 Log.d(TAG, "onServiceConnected: Movie:" + movieTitleFromIntent);
 
-                //Set values of widgets accordning to intent
+                //Set values of widgets according to intent
                 backgroundService.getMovie(movieTitleFromIntent);
             }
 
@@ -171,7 +197,8 @@ public class DetailsActivity extends AppCompatActivity {
             director.setText(movie.getDirector());
             writer.setText(movie.getWriter());
             Picasso.get().load(movie.getPoster()).into(poster);
-
+            personalNotes.setText(movie.getPersonalNotes());
+            ratingBar.setRating(Float.parseFloat(movie.getPersonalRating()));
             contentView.setVisibility(View.VISIBLE); // Show scroll view once the movie is loaded.
         }
     };

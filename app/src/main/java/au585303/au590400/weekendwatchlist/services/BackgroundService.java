@@ -94,8 +94,8 @@ public class BackgroundService extends Service {
 
     public void getMovie(String movieId)
     {
+        Log.d(TAG, "getMovie: Trying to get movie");
         firestoreHandler.getMovie(movieId);
-        Log.d(TAG, "getMovie: called");
     }
 
     public Movie getReadyMovie()
@@ -103,9 +103,10 @@ public class BackgroundService extends Service {
         return fetchedMovie;
     }
 
-    public void updateMovie() //TODO: Implement
+    public void updateMovie(Movie movie)
     {
-
+        Log.d(TAG, "updateMovie: Trying to update movie");
+        firestoreHandler.updateMovie(movie);
     }
 
     public void deleteMovie(String movieId) //TODO: Implement

@@ -26,6 +26,22 @@ class FirestoreHandler {
         this.listener = listener;
     }
 
+    void updateMovie(Movie movie) {
+        String movieId = movie.getTitle().toLowerCase();
+        db.collection(USERS).document(userEmail).collection(MOVIES).document(movieId).set(movie).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.d(TAG, "onSuccess: Document has been updated!");
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.w(TAG, "onFailure: Document was not updated!", e);
+            }
+        });
+
+    }
+
     void addMovie(Movie movie) {
         // Save movie in Firestore
         String movieId = movie.getTitle().toLowerCase(); // Title of the movie will be the id of the document in Firestore. Since the app doesn't support multiple movies with the same title, this is okay for now.

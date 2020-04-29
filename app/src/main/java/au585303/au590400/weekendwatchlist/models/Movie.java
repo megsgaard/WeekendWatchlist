@@ -39,7 +39,6 @@ public class Movie implements Comparable<Movie>, Parcelable {
     public Movie() {
     }
 
-
     protected Movie(Parcel in) {
         title = in.readString();
         year = in.readString();
