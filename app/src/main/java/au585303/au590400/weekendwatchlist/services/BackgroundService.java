@@ -69,7 +69,7 @@ public class BackgroundService extends Service {
         return null;
     }
 
-    public void addMovie(String searchWord, String userEmail) //TODO: Implement
+    public void addMovie(String searchWord, String userEmail) //TODO: Implement FHJ: Mener at det er unødvendigt med emailen
     {
         Log.d(TAG, "addMovie: " + searchWord);
         apiHandler.addRequest(searchWord, userEmail);
@@ -100,7 +100,7 @@ public class BackgroundService extends Service {
 
     }
 
-    public void deleteMovie(String movie) //TODO: Implement
+    public void deleteMovie(String movie)
     {
         firestoreHandler.deleteMovie(movie);
     }

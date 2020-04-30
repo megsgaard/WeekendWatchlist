@@ -255,6 +255,5 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
         });
 
         alertDialogBuilder.show();
-        //backgroundService.deleteMovie(movie.getTitle());
     }
 }
