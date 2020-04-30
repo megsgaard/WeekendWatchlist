@@ -95,7 +95,7 @@ public class APIHandler {
         } else {
             imageUrl = movieGsonObject.getPoster();
         }
-        Movie movie = new Movie(movieGsonObject.getTitle(), movieGsonObject.getYear(), movieGsonObject.getGenre(), movieGsonObject.getRuntime(), movieGsonObject.getDirector(), movieGsonObject.getWriter(), movieGsonObject.getActors(), movieGsonObject.getPlot(), movieGsonObject.getAwards(), imageUrl, movieGsonObject.getImdbRating());
+        Movie movie = new Movie(movieGsonObject.getTitle(), movieGsonObject.getYear(), movieGsonObject.getGenre(), movieGsonObject.getRuntime(), movieGsonObject.getDirector(), movieGsonObject.getWriter(), movieGsonObject.getActors(), movieGsonObject.getPlot(), movieGsonObject.getAwards(), imageUrl, movieGsonObject.getImdbRating(), "0", "");
         Log.d(TAG, movie.getPoster());
         return movie;
     }
