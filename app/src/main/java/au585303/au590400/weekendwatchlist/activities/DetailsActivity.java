@@ -204,6 +204,8 @@ public class DetailsActivity extends AppCompatActivity {
             personalNotes.setText(movie.getPersonalNotes());
             ratingBar.setRating(Float.parseFloat(movie.getPersonalRating()));
             contentView.setVisibility(View.VISIBLE); // Show scroll view once the movie is loaded.
+            actors.setText(movie.getActors());
+            awards.setText(movie.getAwards());
         }
     };
 }

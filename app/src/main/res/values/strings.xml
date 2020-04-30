@@ -42,6 +42,8 @@
         <item>War</item>
         <item>Western</item>
     </string-array>
+    <string name="actors_text">Actors</string>
+    <string name="awards_text">Awards</string>
 
 
 </resources>
