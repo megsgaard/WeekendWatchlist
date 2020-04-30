@@ -44,6 +44,17 @@
     </string-array>
     <string name="actors_text">Actors</string>
     <string name="awards_text">Awards</string>
+    <string name="details_share_dialog_header">Enter email of the user of you want to share movie with</string>
+    <string name="share_movie">Share movie</string>
+    <string name="list_filter_dialog_header">Filter movies by selecting genre</string>
+    <string name="filter_text">Filter</string>
+    <string name="clear_filter_text">Clear filter</string>
+    <string name="login_warning_text">You must login or sign up to use the app</string>
+    <string name="example_email">email@address.com</string>
+    <string name="share_text">Share</string>
+    <string name="filter">Filter</string>
+    <string name="sort">Sort</string>
+    <string name="search">Search</string>
 
 
 </resources>

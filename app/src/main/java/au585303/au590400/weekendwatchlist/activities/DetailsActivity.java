@@ -152,9 +152,9 @@ public class DetailsActivity extends AppCompatActivity {
         final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         final LayoutInflater inflater = getLayoutInflater();
         final View view = inflater.inflate(R.layout.share_dialog, null);
-        alertDialogBuilder.setTitle("Enter email of the user of you want to share movie with");
+        alertDialogBuilder.setTitle(R.string.details_share_dialog_header);
         alertDialogBuilder.setView(view)
-                .setPositiveButton("Share movie", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.share_movie, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         EditText txtEmail = view.findViewById(R.id.txtShareEmail);

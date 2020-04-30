@@ -4,17 +4,17 @@
     <item
         android:id="@+id/app_bar_filterByCategory"
         android:icon="@drawable/ic_filter_list_24px"
-        android:title="Filter"
+        android:title="@string/filter"
         app:showAsAction="ifRoom|collapseActionView" />
     <item
         android:id="@+id/app_bar_sortByRating"
         android:icon="@drawable/ic_sort_24px"
-        android:title="Sort"
+        android:title="@string/sort"
         app:showAsAction="ifRoom|collapseActionView" />
     <item
         android:id="@+id/app_bar_search"
         android:icon="@drawable/ic_search_black_24dp"
-        android:title="Search"
+        android:title="@string/search"
         app:showAsAction="ifRoom|collapseActionView"
         app:actionViewClass="androidx.appcompat.widget.SearchView" />
 </menu>

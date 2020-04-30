@@ -61,6 +61,7 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
     public static final String MOVIES = "movies";
     public static final String SELECTED_GENRE = "SelectedGenre";
     public static final String SELECTED_GENRE_POSITION = "selectedGenrePosition";
+    public static final String ALL = "All";
     private FirebaseFirestore fireStore = FirebaseFirestore.getInstance();
     private ServiceConnection serviceConnection;
     private BackgroundService backgroundService;
@@ -83,7 +84,7 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
             selectedGenrePosition = savedInstanceState.getInt(SELECTED_GENRE_POSITION);
         } else {
             movies = new ArrayList<>();
-            selectedGenre = "All";
+            selectedGenre = ALL;
         }
 
         initViews();
@@ -93,7 +94,6 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
     @Override
     protected void onStart() {
         super.onStart();
-        // TODO: MEG: I guess this logic should be moved to FirestoreHandler instead.
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             fireStore.collection(USERS).document(FirebaseAuth.getInstance().getCurrentUser().getEmail()).collection(MOVIES).addSnapshotListener(this,
                     new EventListener<QuerySnapshot>() {
@@ -240,20 +240,20 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
 
             }
         });
-        alertDialogBuilder.setTitle("Filter movies by selecting genre");
+        alertDialogBuilder.setTitle(R.string.list_filter_dialog_header);
         alertDialogBuilder.setView(view)
-                .setPositiveButton("Filter", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.filter_text, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
                     }
                 })
-                .setNeutralButton("Clear filter", new DialogInterface.OnClickListener() {
+                .setNeutralButton(R.string.clear_filter_text, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         selectedGenrePosition = 0;
-                        selectedGenre = "All";
-                        adapter.getGenreFilter().filter("All");
+                        selectedGenre = ALL;
+                        adapter.getGenreFilter().filter(ALL);
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -270,13 +270,13 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RC_SIGN_IN) {
             if (resultCode == RESULT_OK) {
-                Log.d(TAG, "onActivityResult: Login was successfull");
+                Log.d(TAG, "onActivityResult: Login was successful");
                 setActionBar();
                 backgroundService.setUserEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
             } else {
                 Log.d(TAG, "Login was aborted");
                 launchSignIn();
-                Toast.makeText(this, "You must login or sign up to use the app", LENGTH_LONG).show();
+                Toast.makeText(this, R.string.login_warning_text, LENGTH_LONG).show();
             }
         }
     }
