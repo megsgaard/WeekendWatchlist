@@ -49,6 +49,8 @@ public class DetailsActivity extends AppCompatActivity {
     TextView genre;
     TextView director;
     TextView writer;
+    TextView actors;
+    TextView awards;
     ImageView poster;
     RatingBar ratingBar;
     EditText personalNotes;
@@ -65,13 +67,15 @@ public class DetailsActivity extends AppCompatActivity {
         //Set widgets
         title = findViewById(R.id.txtTitle);
         year = findViewById(R.id.txtYear);
-        imdbRating = findViewById(R.id.tvIMdBRating);
-        movieLength = findViewById(R.id.tvMovieLength);
-        plot = findViewById(R.id.tvPlot);
-        genre = findViewById(R.id.tvGenre);
-        director = findViewById(R.id.tvDirector);
-        writer = findViewById(R.id.tvWriter);
+        imdbRating = findViewById(R.id.txtIMdBRating);
+        movieLength = findViewById(R.id.txtMovieLength);
+        plot = findViewById(R.id.txtPlot);
+        genre = findViewById(R.id.txtGenre);
+        director = findViewById(R.id.txtDirector);
+        writer = findViewById(R.id.txtWriter);
         poster = findViewById(R.id.ivPoster);
+        actors = findViewById(R.id.txtActors);
+        awards = findViewById(R.id.txtAwards);
 
         //Get intent
         Intent intent = getIntent();

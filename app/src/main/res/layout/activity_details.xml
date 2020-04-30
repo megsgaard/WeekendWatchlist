@@ -53,7 +53,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/txtTitle" />
 
             <TextView
-                android:id="@+id/tvIMdBRating"
+                android:id="@+id/txtIMdBRating"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
@@ -64,7 +64,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/ivPoster" />
 
             <TextView
-                android:id="@+id/tvMovieLength"
+                android:id="@+id/txtMovieLength"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
@@ -74,7 +74,7 @@
                 app:layout_constraintTop_toTopOf="@+id/txtYear" />
 
             <TextView
-                android:id="@+id/tvPlot"
+                android:id="@+id/txtPlot"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
@@ -85,10 +85,10 @@
                 android:text="@string/default_text"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tvMovieLength" />
+                app:layout_constraintTop_toBottomOf="@+id/txtMovieLength" />
 
             <TextView
-                android:id="@+id/tvGenre"
+                android:id="@+id/txtGenre"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="80dp"
@@ -102,7 +102,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/txtPersonalNotes" />
 
             <TextView
-                android:id="@+id/tvGenreHeader"
+                android:id="@+id/txtGenreHeader"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
@@ -114,7 +114,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/txtPersonalNotes" />
 
             <TextView
-                android:id="@+id/tvDirectorHeader"
+                android:id="@+id/txtDirectorHeader"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
@@ -123,10 +123,10 @@
                 android:text="@string/director_text"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tvGenreHeader" />
+                app:layout_constraintTop_toBottomOf="@+id/txtGenreHeader" />
 
             <TextView
-                android:id="@+id/tvDirector"
+                android:id="@+id/txtDirector"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="80dp"
@@ -137,10 +137,10 @@
                 android:text="@string/default_text"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tvGenre" />
+                app:layout_constraintTop_toBottomOf="@+id/txtGenre" />
 
             <TextView
-                android:id="@+id/tvWriterHeader"
+                android:id="@+id/txtWriterHeader"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
@@ -149,10 +149,10 @@
                 android:text="@string/writer_text"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tvDirectorHeader" />
+                app:layout_constraintTop_toBottomOf="@+id/txtDirectorHeader" />
 
             <TextView
-                android:id="@+id/tvWriter"
+                android:id="@+id/txtWriter"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="80dp"
@@ -163,7 +163,7 @@
                 android:text="@string/default_text"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tvDirector" />
+                app:layout_constraintTop_toBottomOf="@+id/txtDirector" />
 
             <RatingBar
                 android:id="@+id/ratingBar"
@@ -214,6 +214,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/ratingBar" />
 
             <TextView
+                style="@style/TextHeader"
                 android:id="@+id/txtPersonalRating"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -226,7 +227,55 @@
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tvPlot" />
+                app:layout_constraintTop_toBottomOf="@+id/txtPlot" />
+
+            <TextView
+                style="@style/TextHeader"
+                android:id="@+id/txtActorsHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/default_text"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/txtWriterHeader" />
+
+            <TextView
+                android:id="@+id/txtActors"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="80dp"
+                android:layout_marginLeft="80dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/default_text"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/txtWriter" />
+
+            <TextView
+                style="@style/TextHeader"
+                android:id="@+id/txtAwardsHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/default_text"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/txtActorsHeader" />
+
+            <TextView
+                android:id="@+id/txtAwards"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="80dp"
+                android:layout_marginLeft="80dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/default_text"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/txtActors" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
