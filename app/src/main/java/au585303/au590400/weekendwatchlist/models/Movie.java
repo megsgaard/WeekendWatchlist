@@ -21,7 +21,7 @@ public class Movie implements Comparable<Movie>, Parcelable {
     private String personalNotes;
 
     //Constructor
-    public Movie(String title, String year, String genre, String runtime, String director, String writer, String actors, String plot, String awards, String poster, String imdbRating) {
+    public Movie(String title, String year, String genre, String runtime, String director, String writer, String actors, String plot, String awards, String poster, String imdbRating, String personalRating, String personalNotes) {
         this.title = title;
         this.year = year;
         this.genre = genre;
@@ -33,6 +33,8 @@ public class Movie implements Comparable<Movie>, Parcelable {
         this.awards = awards;
         this.poster = poster;
         this.imdbRating = imdbRating;
+        this.personalRating = personalRating;
+        this.personalNotes = personalNotes;
     }
 
     //Empty constructor
