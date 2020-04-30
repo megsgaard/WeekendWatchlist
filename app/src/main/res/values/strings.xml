@@ -55,6 +55,10 @@
     <string name="filter">Filter</string>
     <string name="sort">Sort</string>
     <string name="search">Search</string>
+    <string name="personal_notes_text">Personal Notes</string>
+    <string name="personal_rating_text">Personal Rating</string>
+    <string name="update_text">UPDATE</string>
+    <string name="personal_notes_hint">write your own notes, comments, review here</string>
 
 
 </resources>

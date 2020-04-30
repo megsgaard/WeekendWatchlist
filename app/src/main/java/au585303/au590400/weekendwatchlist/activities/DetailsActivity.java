@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -200,7 +201,9 @@ public class DetailsActivity extends AppCompatActivity {
             genre.setText(movie.getGenre());
             director.setText(movie.getDirector());
             writer.setText(movie.getWriter());
-            Picasso.get().load(movie.getPoster()).into(poster);
+            Picasso.get().load(movie.getPoster())
+                    .resize(0,600)
+                    .into(poster);
             personalNotes.setText(movie.getPersonalNotes());
             ratingBar.setRating(Float.parseFloat(movie.getPersonalRating()));
             contentView.setVisibility(View.VISIBLE); // Show scroll view once the movie is loaded.
