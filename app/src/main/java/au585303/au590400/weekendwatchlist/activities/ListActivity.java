@@ -9,15 +9,20 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -33,7 +38,6 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
@@ -46,93 +50,86 @@ import java.util.Map;
 import au585303.au590400.weekendwatchlist.R;
 import au585303.au590400.weekendwatchlist.adapters.ListAdapter;
 import au585303.au590400.weekendwatchlist.models.Movie;
-import au585303.au590400.weekendwatchlist.services.APIHandler;
 import au585303.au590400.weekendwatchlist.services.BackgroundService;
 
 import static android.widget.Toast.LENGTH_LONG;
 
-public class ListActivity extends AppCompatActivity implements ListAdapter.OnItemClickListener, ListAdapter.OnItemLongClickListener  {
+public class ListActivity extends AppCompatActivity implements ListAdapter.OnItemClickListener, ListAdapter.OnItemLongClickListener {
     private static final String TAG = "ListActivity";
     private static final int RC_SIGN_IN = 101;
+    public static final String USERS = "users";
+    public static final String MOVIES = "movies";
+    public static final String SELECTED_GENRE = "SelectedGenre";
+    public static final String SELECTED_GENRE_POSITION = "selectedGenrePosition";
     private FirebaseFirestore fireStore = FirebaseFirestore.getInstance();
     private ServiceConnection serviceConnection;
     private BackgroundService backgroundService;
-    private List<Movie> movies = new ArrayList<>();
-
-    //widgets
-    private RecyclerView recyclerView;
+    private ArrayList<Movie> movies;
+    private int selectedGenrePosition;
+    private String selectedGenre;
     private ListAdapter adapter;
-    private FloatingActionButton buttonAdd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate called");
         super.onCreate(savedInstanceState);
-        initService();
         setContentView(R.layout.activity_list);
+        checkUserStatus();
 
+        if (savedInstanceState != null) {
+            // Doing this to save recycler view position on rotation
+            movies = savedInstanceState.getParcelableArrayList(MOVIES);
+            selectedGenre = savedInstanceState.getString(SELECTED_GENRE);
+            selectedGenrePosition = savedInstanceState.getInt(SELECTED_GENRE_POSITION);
+        } else {
+            movies = new ArrayList<>();
+            selectedGenre = "All";
+        }
+
+        initViews();
+        initService();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // TODO: MEG: I guess this logic should be moved to FirestoreHandler instead.
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            fireStore.collection(USERS).document(FirebaseAuth.getInstance().getCurrentUser().getEmail()).collection(MOVIES).addSnapshotListener(this,
+                    new EventListener<QuerySnapshot>() {
+                        @Override
+                        public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                            if (queryDocumentSnapshots != null && !queryDocumentSnapshots.getDocuments().isEmpty()) {
+                                for (DocumentSnapshot snapshot : queryDocumentSnapshots.getDocuments()) {
+                                    Movie movie = snapshot.toObject(Movie.class);
+                                    if (!movies.contains(movie)) {
+                                        movies.add(movie);
+                                    }
+                                }
+                                adapter.setMovies(movies);
+                                adapter.getGenreFilter().filter(selectedGenre);
+                            }
+                        }
+                    }
+            );
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList(MOVIES, movies);
+        outState.putString(SELECTED_GENRE, selectedGenre);
+        outState.putInt(SELECTED_GENRE_POSITION, selectedGenrePosition);
+    }
+
+    private void checkUserStatus() {
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
             // If user is not logged in
             launchSignIn();
         } else {
             setActionBar();
         }
-
-        //Set widgets
-        recyclerView = findViewById(R.id.recyclerView);
-        buttonAdd = findViewById(R.id.fabAdd);
-
-        //Set up adapter and recyclerview
-        adapter = new ListAdapter(movies, this,this);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(adapter);
-
-        buttonAdd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG, "onClick: Enter");
-                OpenAlertDialog();
-            }
-        });
-    }
-
-    private void initService() {
-        Log.d(TAG, "initService: setting up connection, starting and binding to service");
-        setupServiceConnection();
-        bindService(new Intent(this, BackgroundService.class), serviceConnection, Context.BIND_AUTO_CREATE);
-    }
-
-    private void setupServiceConnection() {
-        serviceConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                backgroundService = ((BackgroundService.LocalBinder) service).getService();
-//                backgroundService.addMovie(); this will crash if the user isn't logged in. tested that it works. commented out to not break on first startup
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                backgroundService = null;
-            }
-        };
-    }
-
-    private void testCode() {
-        //Kode direkte kopieret fra hans demo
-        Map<String, Object> item = new HashMap<>();
-        item.put("text", new Date().toString());
-
-        Task<DocumentReference> items = fireStore.collection("Items").add(item).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-            @Override
-            public void onSuccess(DocumentReference documentReference) {
-                Log.d(TAG, "Added " + documentReference.getId());
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.d(TAG, e.getMessage());
-            }
-        });
     }
 
     private void launchSignIn() {
@@ -153,19 +150,60 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
         getSupportActionBar().setTitle(userEmail);
     }
 
+    private void initViews() {
+        //Set widgets
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+        FloatingActionButton buttonAdd = findViewById(R.id.fabAdd);
+
+        //Set up adapter and recyclerview
+        adapter = new ListAdapter(movies, this, this);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(adapter);
+
+        buttonAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "onClick: Enter");
+                openAddMovieDialog();
+            }
+        });
+    }
+
+    private void initService() {
+        Log.d(TAG, "initService: setting up connection, starting and binding to service");
+        setupServiceConnection();
+        bindService(new Intent(this, BackgroundService.class), serviceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    private void setupServiceConnection() {
+        serviceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                backgroundService = ((BackgroundService.LocalBinder) service).getService();
+                if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+                    backgroundService.setUserEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
+                }
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                backgroundService = null;
+            }
+        };
+    }
+
     //Inspiration from: https://developer.android.com/guide/topics/ui/dialogs.html
-    private void OpenAlertDialog()
-    {
+    private void openAddMovieDialog() {
         final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(ListActivity.this);
         final LayoutInflater inflater = getLayoutInflater();
-        final View view = inflater.inflate(R.layout.search_dialog,null);
+        final View view = inflater.inflate(R.layout.search_dialog, null);
+        alertDialogBuilder.setTitle(R.string.dialog_text);
         alertDialogBuilder.setView(view)
                 .setPositiveButton(R.string.add_movie, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        EditText searchWord = view.findViewById(R.id.etSearchWord);
-                        String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
-                        backgroundService.addMovie(searchWord.getText().toString(), userEmail); //TODO: FHJ: Tror ikke emailen er nødvendig
+                        EditText searchWord = view.findViewById(R.id.txtSearchWord);
+                        backgroundService.addMovie(searchWord.getText().toString());
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -175,56 +213,106 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
                     }
                 });
 
-                alertDialogBuilder.show();
-        //backgroundService.addMovie("Joker");
+        alertDialogBuilder.show();
     }
 
+    private void openFilterMoviesDialog() {
+        final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(ListActivity.this);
+        final LayoutInflater inflater = getLayoutInflater();
+        final View view = inflater.inflate(R.layout.filter_dialog, null);
+
+        // https://developer.android.com/guide/topics/ui/controls/spinner
+        final Spinner spinner = view.findViewById(R.id.genre_spinner);
+        ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(this, R.array.genres_array, android.R.layout.simple_spinner_item);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(spinnerAdapter);
+        spinner.setSelection(selectedGenrePosition);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selectedGenrePosition = position;
+                selectedGenre = parent.getItemAtPosition(position).toString();
+                adapter.getGenreFilter().filter(selectedGenre);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        alertDialogBuilder.setTitle("Filter movies by selecting genre");
+        alertDialogBuilder.setView(view)
+                .setPositiveButton("Filter", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setNeutralButton("Clear filter", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        selectedGenrePosition = 0;
+                        selectedGenre = "All";
+                        adapter.getGenreFilter().filter("All");
+                    }
+                })
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+        alertDialogBuilder.show();
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RC_SIGN_IN) {
-            IdpResponse response = IdpResponse.fromResultIntent(data);
-            Log.d(TAG, "RequestCode correct");
             if (resultCode == RESULT_OK) {
-                Log.d(TAG, "Result code OK");
-                // Successfully signed in
-                // Change appbar title to username
+                Log.d(TAG, "onActivityResult: Login was successfull");
                 setActionBar();
+                backgroundService.setUserEmail(FirebaseAuth.getInstance().getCurrentUser().getEmail());
             } else {
                 Log.d(TAG, "Login was aborted");
                 launchSignIn();
                 Toast.makeText(this, "You must login or sign up to use the app", LENGTH_LONG).show();
-
-                // Sign in failed. If response is null the user canceled the
-                // sign-in flow using the back button. Otherwise check
-                // response.getError().getErrorCode() and handle the error.
-                // ...
             }
         }
     }
 
-    // TODO: MEG: Maybe this should be moved to onStart() instead?
+    // Search menu inspired by this video: https://youtu.be/sJ-Z9G0SDhc
     @Override
-    protected void onResume() {
-        super.onResume();
-        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            fireStore.collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getEmail()).collection("movies").addSnapshotListener(this,
-                    new EventListener<QuerySnapshot>() {
-                        @Override
-                        public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                            if (queryDocumentSnapshots != null && !queryDocumentSnapshots.getDocuments().isEmpty()) {
-                                /*List<Movie>*/ movies = new ArrayList<>();
-                                for (DocumentSnapshot snapshot : queryDocumentSnapshots.getDocuments()) {
-                                    Movie movie = snapshot.toObject(Movie.class);
-                                    movies.add(movie);
-                                }
-                                adapter.setMovies(movies);
-                            }
-                        }
-                    }
-            );
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.list_menu, menu);
+
+        MenuItem searchItem = menu.findItem(R.id.app_bar_search);
+        SearchView searchView = (SearchView) searchItem.getActionView();
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                adapter.getSearchFilter().filter(newText);
+                return false;
+            }
+        });
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.app_bar_sortByRating) {
+            adapter.sortMoviesByRating();
         }
+        if (item.getItemId() == R.id.app_bar_filterByCategory) {
+            openFilterMoviesDialog();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -242,18 +330,19 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
         //Create AlertDialog to make safe delete
         final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(ListActivity.this);
         alertDialogBuilder.setMessage(R.string.delete_question)
-        .setPositiveButton(R.string.delete_yes, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                backgroundService.deleteMovie(movie.getTitle());
-            }
-        }).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.delete_yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        backgroundService.deleteMovie(movie.getTitle());
+                        movies.remove(movie);
+                        adapter.notifyDataSetChanged();
+                    }
+                }).setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
             }
         });
-
         alertDialogBuilder.show();
     }
 }
