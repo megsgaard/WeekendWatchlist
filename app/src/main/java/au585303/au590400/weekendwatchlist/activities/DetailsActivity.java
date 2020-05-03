@@ -106,6 +106,15 @@ public class DetailsActivity extends AppCompatActivity {
                 finish();
             }
         });
+
+        //Retrieve data from savedInstance
+        if(savedInstanceState != null)
+        {
+            float rating = savedInstanceState.getFloat("Rating");
+            ratingBar.setRating(rating);
+            String notes = savedInstanceState.getString("Notes");
+            personalNotes.setText(notes);
+        }
     }
 
     @Override
@@ -211,4 +220,19 @@ public class DetailsActivity extends AppCompatActivity {
             awards.setText(movie.getAwards());
         }
     };
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putFloat("Rating",ratingBar.getRating());
+        outState.putString("Notes",personalNotes.getText().toString());
+    }
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        float rating = savedInstanceState.getFloat("Rating");
+        ratingBar.setRating(rating);
+        String notes = savedInstanceState.getString("Notes");
+        personalNotes.setText(notes);
+    }
 }
