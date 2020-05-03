@@ -40,6 +40,8 @@ public class DetailsActivity extends AppCompatActivity {
     private String movieTitleFromIntent;
     private Movie movie;
     private View contentView;
+    private float ratingState;
+    private String notesState;
 
     //Widgets
     TextView title;
@@ -108,12 +110,9 @@ public class DetailsActivity extends AppCompatActivity {
         });
 
         //Retrieve data from savedInstance
-        if(savedInstanceState != null)
-        {
-            float rating = savedInstanceState.getFloat("Rating");
-            ratingBar.setRating(rating);
-            String notes = savedInstanceState.getString("Notes");
-            personalNotes.setText(notes);
+        if (savedInstanceState != null) {
+            ratingState = savedInstanceState.getFloat("Rating");
+            notesState = savedInstanceState.getString("Notes");
         }
     }
 
@@ -211,10 +210,20 @@ public class DetailsActivity extends AppCompatActivity {
             director.setText(movie.getDirector());
             writer.setText(movie.getWriter());
             Picasso.get().load(movie.getPoster())
-                    .resize(0,600)
+                    .resize(0, 600)
                     .into(poster);
-            personalNotes.setText(movie.getPersonalNotes());
-            ratingBar.setRating(Float.parseFloat(movie.getPersonalRating()));
+
+            if (notesState != null) {
+                personalNotes.setText(notesState);
+            } else {
+                personalNotes.setText(movie.getPersonalNotes());
+            }
+            if (ratingState != 0.0) {
+                ratingBar.setRating(ratingState);
+            } else {
+                ratingBar.setRating(Float.parseFloat(movie.getPersonalRating()));
+            }
+
             contentView.setVisibility(View.VISIBLE); // Show scroll view once the movie is loaded.
             actors.setText(movie.getActors());
             awards.setText(movie.getAwards());
@@ -224,15 +233,7 @@ public class DetailsActivity extends AppCompatActivity {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putFloat("Rating",ratingBar.getRating());
-        outState.putString("Notes",personalNotes.getText().toString());
-    }
-    @Override
-    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        float rating = savedInstanceState.getFloat("Rating");
-        ratingBar.setRating(rating);
-        String notes = savedInstanceState.getString("Notes");
-        personalNotes.setText(notes);
+        outState.putFloat("Rating", ratingBar.getRating());
+        outState.putString("Notes", personalNotes.getText().toString());
     }
 }
