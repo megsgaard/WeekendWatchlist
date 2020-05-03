@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">WeekendWatchlist</string>
+    <string name="intent_adapter_details">IntentAdapterDetails</string>
+    <string name="intent_extra_movietitle">IntentExtraMovieTitle</string>
+    <string name="default_text">SKAL UDFYLDES</string>
+    <string name="hint_searchword">The Secret Life of Bees</string>
+    <string name="add_movie">Tilføj film til listen</string>
+    <string name="cancel">Annuller</string>
+    <string name="dialog_text">Tilføj film ved at skrive titlen på filmen</string>
+    <string name="genre_text">Genre</string>
+    <string name="director_text">Instruktør</string>
+    <string name="writer_text">Manuskript</string>
+    <string name="delete_question">Vil du slette filmen fra listen?</string>
+    <string name="delete_yes">Ja, slet</string>
+    <string name="actors_text">Skuespillere</string>
+    <string name="awards_text">Priser</string>
+    <string name="details_share_dialog_header">Indtast email på den du vil dele filmen med</string>
+    <string name="share_movie">Del film</string>
+    <string name="list_filter_dialog_header">Filtrer film efter genre</string>
+    <string name="filter_text">Filtrer</string>
+    <string name="clear_filter_text">Ryd filtrering</string>
+    <string name="login_warning_text">Du skal logge ind eller oprette en bruger</string>
+    <string name="example_email">email@adresse.dk</string>
+    <string name="share_text">Del</string>
+    <string name="filter">Filtrer</string>
+    <string name="sort">Sorter</string>
+    <string name="search">Søg</string>
+    <string name="personal_notes_text">Dine noter</string>
+    <string name="personal_rating_text">Din rating</string>
+    <string name="update_text">OPDATER</string>
+    <string name="personal_notes_hint">skriv dine egne noter eller kommentarer her</string>
+    <string name="movie_already_in_list">Filmen er allerede på din liste</string>
+    <string name="movie_shared">Filmen er blevet delt</string>
+    <string name="movie_added">Filmen er blevet tilføjet til din liste</string>
+    <string name="api_fail">Filmen findes ikke. Kontroller at du har stavet filmens titel rigtigt og prøv igen</string>
+</resources>
