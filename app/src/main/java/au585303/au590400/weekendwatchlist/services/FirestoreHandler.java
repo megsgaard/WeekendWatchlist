@@ -90,6 +90,7 @@ class FirestoreHandler {
             @Override
             public void onFailure(@NonNull Exception e) {
                 Log.d(TAG, "onFailure: " + e);
+                listener.onMovieReady(null);
             }
         });
     }

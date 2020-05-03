@@ -203,7 +203,29 @@ public class ListActivity extends AppCompatActivity implements ListAdapter.OnIte
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         EditText searchWord = view.findViewById(R.id.txtSearchWord);
-                        backgroundService.addMovie(searchWord.getText().toString());
+                        boolean movieAlreadyInList = false;
+
+                        //Check if movie is already in the list
+                        for(Movie movie : movies)
+                        {
+                            String movietitle = movie.getTitle().toLowerCase();
+                            String searchtitle = searchWord.getText().toString().toLowerCase();
+                            if(movietitle.equals(searchtitle))
+                                movieAlreadyInList = true;
+                        }
+
+                        //If movie is not already in the list add it
+                        if(movieAlreadyInList ==true)
+                        {
+                            Toast.makeText(ListActivity.this,R.string.movie_already_in_list,LENGTH_LONG).show();
+                            Log.d(TAG, "onClick: Movie already in the list");
+                        }
+                        else
+                        {
+                            backgroundService.addMovie(searchWord.getText().toString());
+                            Log.d(TAG, "onClick: Movie not in the list");
+                        }
+
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {

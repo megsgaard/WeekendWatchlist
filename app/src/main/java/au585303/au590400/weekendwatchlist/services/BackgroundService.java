@@ -11,6 +11,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import java.util.List;
 
+import au585303.au590400.weekendwatchlist.R;
 import au585303.au590400.weekendwatchlist.models.Movie;
 
 import static android.widget.Toast.LENGTH_LONG;
@@ -81,8 +82,11 @@ public class BackgroundService extends Service {
         return null;
     }
 
-    public void addMovie(String searchWord) //TODO: Implement
+    public void addMovie(String searchWord)
     {
+        //Check if movie is already in the list
+        //if(getMovie(searchWord);)
+
         Log.d(TAG, "addMovie: " + searchWord);
         apiHandler.addRequest(searchWord);
     }
@@ -128,10 +132,10 @@ public class BackgroundService extends Service {
     }
 
     private void showMovieShared() {
-        Toast.makeText(this, "Movie has been shared!", LENGTH_LONG).show();
+        Toast.makeText(this, R.string.movie_shared, LENGTH_LONG).show();
     }
 
     private void showMovieAdded() {
-        Toast.makeText(this, "Movie has been added to your list!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.movie_added, Toast.LENGTH_SHORT).show();
     }
 }

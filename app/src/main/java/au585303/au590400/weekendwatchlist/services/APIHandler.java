@@ -2,6 +2,7 @@ package au585303.au590400.weekendwatchlist.services;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -14,6 +15,8 @@ import com.google.gson.GsonBuilder;
 
 import org.json.JSONObject;
 
+import au585303.au590400.weekendwatchlist.R;
+import au585303.au590400.weekendwatchlist.activities.ListActivity;
 import au585303.au590400.weekendwatchlist.models.Movie;
 import au585303.au590400.weekendwatchlist.models.MovieGsonObject;
 
@@ -59,24 +62,15 @@ public class APIHandler {
                         movieToBeAdded = null;
                     }
                 }
+                else
+                {
+                    Toast.makeText(context, R.string.api_fail, Toast.LENGTH_LONG).show();
+                }
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.d(TAG, "Json response error" + error);
-
-                // Created custom toast with inspiration from: https://stackoverflow.com/questions/31175601/how-can-i-change-default-toast-message-color-and-background-color-in-android
-                /*Toast toast = Toast.makeText(context.getApplicationContext(), searchWord + " " + context.getText(R.string.word_does_not_exist), LENGTH_LONG);
-                View view = toast.getView();
-
-                view.getBackground().setColorFilter(context.getResources().getColor(R.color.colorPrimaryDark), PorterDuff.Mode.SRC_IN);
-
-                TextView text = view.findViewById(android.R.id.message);
-                text.setTextColor(context.getResources().getColor(R.color.colorAccent));
-                text.setTextSize(25);
-
-                toast.show();
-*/
             }
         });
         requestQueue.add(jsonObjectRequest);
